@@ -1,0 +1,252 @@
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import type { BookRecord } from '../data/books';
+
+gsap.registerPlugin(ScrollTrigger);
+
+interface BookDetailProps {
+  books: BookRecord[];
+  period: string;
+  onSelectBook?: (book: BookRecord) => void;
+}
+
+const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    if (hasError && retryCount < 3) {
+      const timer = setTimeout(() => {
+        setHasError(false);
+        setRetryCount(c => c + 1);
+      }, 1000 + retryCount * 1000); // Increasing backoff: 1s, 2s, 3s
+      return () => clearTimeout(timer);
+    }
+  }, [hasError, retryCount]);
+
+  if (hasError && retryCount >= 3) {
+    return (
+      <div 
+        className={className}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#1e293b',
+          color: '#64748b',
+          fontSize: '0.8rem',
+          minHeight: '200px'
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px', opacity: 0.5 }}>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span>Preview Unavailable</span>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={`${src}${retryCount > 0 ? `?retry=${retryCount}` : ''}`} 
+      alt={alt} 
+      className={className}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
+const getMuseumUrl = (book: BookRecord) => {
+  const inst = book.institution?.toLowerCase() || '';
+  if (inst.includes('library of congress')) return `https://www.loc.gov/item/${book.id}/`;
+  if (inst.includes('bodleian')) return `https://digital.bodleian.ox.ac.uk/objects/${book.id}/`;
+  if (inst.includes('national diet library')) return `https://dl.ndl.go.jp/pid/${book.id}`;
+  if (inst.includes('yale')) return `https://collections.library.yale.edu/catalog/${book.id}`;
+  if (inst.includes('japanese literature')) return `https://kokusho.nijl.ac.jp/biblio/${book.id}/`;
+  if (inst.includes('harvard')) return `https://hollis.harvard.edu/primo-explore/search?query=any,contains,${book.id}&vid=HVD2`;
+  return book.manifestUrl; // fallback
+};
+
+export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
+  const [visibleCount, setVisibleCount] = useState(6);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useEffect(() => {
+    setVisibleCount(6);
+    if (ctxRef.current) {
+      ctxRef.current.revert();
+      ctxRef.current = null;
+    }
+  }, [books]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 6, books.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [books]);
+
+  const visibleBooks = books.slice(0, visibleCount);
+
+  useLayoutEffect(() => {
+    if (!ctxRef.current) {
+      ctxRef.current = gsap.context(() => {}, gridRef);
+    }
+
+    if (gridRef.current) {
+      const cards = gridRef.current.querySelectorAll('.book-card:not(.animated)');
+      
+      ctxRef.current.add(() => {
+        cards.forEach((card) => {
+          card.classList.add('animated');
+          gsap.fromTo(card, 
+            { 
+              opacity: 0, 
+              y: 50,
+              scale: 0.95
+            }, 
+            { 
+              scrollTrigger: {
+                trigger: card,
+                start: "top 90%", // Animate when the top of the card hits 90% of the viewport height
+                once: true, // Do not repeat on scroll back and forth
+              },
+              opacity: 1, 
+              y: 0, 
+              scale: 1,
+              duration: 0.8, 
+              ease: 'power3.out',
+              clearProps: 'all'
+            }
+          );
+        });
+      });
+    }
+  }, [visibleBooks.length]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (ctxRef.current) {
+        ctxRef.current.revert();
+      }
+    };
+  }, []);
+
+  if (books.length === 0) {
+    return (
+      <div className="no-books">
+        <h3>Period: {period}</h3>
+        <p>No books found for this interval.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="book-detail-container">
+      <h2 className="period-title">Books from {period}</h2>
+      <div className="books-grid" ref={gridRef}>
+        {visibleBooks.map((book) => (
+          <div 
+            key={book.id} 
+            className="book-card" 
+            onClick={() => onSelectBook && onSelectBook(book)}
+          >
+            <div className="book-image-container">
+              <SmartImage src={book.thumbnailUrl} alt={book.title} className="book-thumbnail" />
+            </div>
+            <div className="book-info">
+              <div className="book-header">
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <span className="institution-tag">{book.institution}</span>
+                  <span className={`category-tag category-${book.category}`} style={{ 
+                    fontSize: '0.7rem', 
+                    padding: '2px 8px', 
+                    borderRadius: '999px', 
+                    background: book.category === 'astronomy' ? '#805ad5' : book.category === 'mathematics' ? '#3182ce' : '#38a169',
+                    color: 'white',
+                    fontWeight: 600,
+                    textTransform: 'uppercase'
+                  }}>{book.category}</span>
+                </div>
+                <h3>{book.title}</h3>
+              </div>
+              
+              <div className="book-meta-grid">
+                <div className="meta-item" title={book.authors.join(', ')}>
+                  <strong>Authors:</strong> {book.authors[0]}
+                </div>
+                <div className="meta-item">
+                  <strong>Year:</strong> {book.year}
+                </div>
+                <div className="meta-item">
+                  <strong>Dynasty:</strong> {book.dynasty}
+                </div>
+                <div className="meta-item">
+                  <strong>Language:</strong> {book.language[0]}
+                </div>
+                <div className="meta-item">
+                  <strong>Images:</strong> {book.pageCount}
+                </div>
+                {book.illustrationCount && (
+                  <div className="meta-item">
+                    <strong>Illus:</strong> {book.illustrationCount}
+                  </div>
+                )}
+              </div>
+
+              <div className="book-subjects">
+                {book.subjects.slice(0, 3).map((s) => (
+                  <span key={s} className="subject-tag">{s}</span>
+                ))}
+              </div>
+              
+              <div className="spacer" style={{ flexGrow: 1 }}></div>
+              
+                <div className="book-footer">
+                <p className="attribution-text">{book.attribution}</p>
+                <div className="footer-actions">
+                  <a 
+                    href={getMuseumUrl(book)} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="manifest-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Source
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {visibleCount < books.length && (
+        <div ref={observerTarget} style={{ height: '40px', margin: '20px 0', textAlign: 'center', color: '#718096' }}>
+          Scroll for more...
+        </div>
+      )}
+    </div>
+  );
+};
