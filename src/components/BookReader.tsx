@@ -198,6 +198,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
 
   // OCR States
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isQwenTranscribing, setIsQwenTranscribing] = useState(false);
   const [ocrResults, setOcrResults] = useState<OCRResult[]>([]);
   const [characterBoxes, setCharacterBoxes] = useState<CharacterBox[]>([]);
   
@@ -446,6 +447,54 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       alert("Error connecting to backend transcription service.");
     } finally {
       setIsTranscribing(false);
+    }
+  };
+
+  const handleQwenTranscribe = async () => {
+    if (!tileSources[selectedPageIndex]) return;
+    
+    try {
+      setIsQwenTranscribing(true);
+      setOcrResults([]);
+      setCharacterBoxes([]);
+      setTranslatedText(null);
+      setCurrentOcrUrl(null);
+      
+      const infoUrl = tileSources[selectedPageIndex];
+      const imageUrl = infoUrl.replace('info.json', 'full/1000,/0/default.jpg');
+      
+      setOcrDebug({
+        status: "Processing Qwen...",
+        requestedUrl: imageUrl,
+        lang: "auto",
+      });
+      
+      const response = await fetch(`${API_BASE_URL}/api/process-qwen?url=${encodeURIComponent(imageUrl)}`);
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        setOcrResults(result.data);
+        setImageSize({ width: result.width, height: result.height });
+        setCurrentOcrUrl(imageUrl);
+        setOcrDebug({
+          status: "Completed",
+          requestedUrl: result.requested_url || imageUrl,
+          processedWidth: result.processed_width,
+          processedHeight: result.processed_height,
+          originalWidth: result.width,
+          originalHeight: result.height,
+          segmentation: result.segmentation,
+          textDirection: result.text_direction,
+          lang: result.lang
+        });
+      } else {
+        alert("Qwen transcription failed: " + (result.detail || "Unknown error"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to backend Qwen transcription service.");
+    } finally {
+      setIsQwenTranscribing(false);
     }
   };
 
@@ -1100,13 +1149,55 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
                     .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
                   handleTranscribe();
                 }}
-                disabled={isTranscribing || isDetecting}
-                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting) ? 0.9 : 1 }}
+                disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
               >
                 <div className="glow-btn-fill"></div>
                 <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
                   {isTranscribing ? <div className="loading-spinner" /> : <span>✨</span>}
                   <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isTranscribing ? 'OCR...' : 'OCR'}</span>
+                </div>
+              </button>
+
+              <button 
+                className={`glow-btn-group transcribe-btn-new ${isQwenTranscribing ? 'loading' : ''}`}
+                onMouseEnter={(e) => {
+                  const btn = e.currentTarget;
+                  const fill = btn.querySelector('.glow-btn-fill');
+                  if (!fill) return;
+                  const rect = btn.getBoundingClientRect();
+                  const fromTop = e.clientY < rect.top + rect.height / 2;
+                  gsap.killTweensOf(fill);
+                  gsap.fromTo(fill, 
+                    { y: fromTop ? '-100%' : '100%' }, 
+                    { y: '0%', duration: 0.4, ease: "power3.out" }
+                  );
+                }}
+                onMouseLeave={(e) => {
+                  const btn = e.currentTarget;
+                  const fill = btn.querySelector('.glow-btn-fill');
+                  if (!fill) return;
+                  const rect = btn.getBoundingClientRect();
+                  const toTop = e.clientY < rect.top + rect.height / 2;
+                  gsap.killTweensOf(fill);
+                  gsap.to(fill, 
+                    { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
+                  );
+                }}
+                onClick={(e) => {
+                  const btn = e.currentTarget;
+                  gsap.timeline()
+                    .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
+                    .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
+                  handleQwenTranscribe();
+                }}
+                disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
+              >
+                <div className="glow-btn-fill" style={{ background: 'linear-gradient(90deg, #3b82f6, #2dd4bf)' }}></div>
+                <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
+                  {isQwenTranscribing ? <div className="loading-spinner" /> : <span>🤖</span>}
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isQwenTranscribing ? 'QWEN...' : 'QWEN'}</span>
                 </div>
               </button>
 
@@ -1142,8 +1233,8 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
                     .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
                   handleDetectPlants();
                 }}
-                disabled={isTranscribing || isDetecting}
-                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting) ? 0.9 : 1 }}
+                disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
               >
                 <div className="glow-btn-fill"></div>
                 <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
