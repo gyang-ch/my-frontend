@@ -133,6 +133,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+  const [jumpPage, setJumpPage] = useState('');
   const thumbnailsRowRef = useRef<HTMLDivElement>(null);
 
   // Synchronize thumbnail scrolling
@@ -678,22 +679,39 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
           font-size: 0.85rem;
           color: #a0aec0;
         }
-        .page-nav-form {
-          margin: 0;
-        }
-        .page-nav-input {
-          width: 36px;
-          background: rgba(15, 23, 42, 0.8);
+        .goto-form {
+          display: inline-flex;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
           border: 1px solid #4a5568;
-          color: #f8fafc;
-          border-radius: 4px;
-          padding: 2px 4px;
-          text-align: center;
-          font-size: 0.85rem;
-          outline: none;
+          height: 32px;
         }
-        .page-nav-input:focus {
-          border-color: #3b82f6;
+        .goto-text {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(30, 41, 59, 0.8);
+          color: #e2e8f0;
+          border-right: 1px solid #4a5568;
+          padding: 0 10px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          user-select: none;
+        }
+        .goto-input {
+          width: 44px;
+          background: rgba(15, 23, 42, 0.8);
+          border: none;
+          color: #f8fafc;
+          text-align: center;
+          font-size: 0.8rem;
+          font-weight: 700;
+          outline: none;
+          padding: 0;
+        }
+        .goto-input:focus {
+          background: rgba(30, 41, 59, 0.9);
         }
 
         /* Pagination Button Group */
@@ -958,6 +976,27 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
                   </div>
+
+                  <form 
+                    className="goto-form" 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const p = parseInt(jumpPage);
+                      if (!isNaN(p) && p >= 1 && p <= tileSources.length) {
+                        setSelectedPageIndex(p - 1);
+                        setJumpPage('');
+                      }
+                    }}
+                  >
+                    <span className="goto-text">Go to</span>
+                    <input 
+                      type="text" 
+                      className="goto-input" 
+                      value={jumpPage}
+                      onChange={(e) => setJumpPage(e.target.value.replace(/[^0-9]/g, ''))}
+                      aria-label="Go to page"
+                    />
+                  </form>
                 </div>              </div>
               <div className="thumbnails-row custom-scrollbar" ref={thumbnailsRowRef}>
                 {tileSources.map((source, index) => {
