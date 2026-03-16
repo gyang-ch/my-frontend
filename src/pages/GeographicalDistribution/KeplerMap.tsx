@@ -18,7 +18,7 @@ const reducers = combineReducers({
 
 const store = createStore(reducers, {}, applyMiddleware(taskMiddleware));
 
-const Map = () => {
+const Map = ({ width }: { width: number }) => {
   const dispatch = useDispatch();
   // Vite exposes env vars to browser code only when prefixed with `VITE_`.
   const mapboxToken = (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined) || '';
@@ -151,7 +151,7 @@ const Map = () => {
   }, [dispatch]);
 
   return (
-    <div style={{ width: '100%', height: '800px', position: 'relative' }}>
+    <div style={{ width: `${width}px`, height: '800px', position: 'relative' }}>
       {!mapboxToken && (
         <div
           style={{
@@ -173,17 +173,17 @@ const Map = () => {
       <KeplerGl
         id="plant-distribution-map"
         mapboxApiAccessToken={mapboxToken}
-        width={window.innerWidth}
+        width={width}
         height={800}
       />
     </div>
   );
 };
 
-export const KeplerMap: React.FC = () => {
+export const KeplerMap: React.FC<{ width: number }> = ({ width }) => {
   return (
     <Provider store={store}>
-      <Map />
+      <Map width={width} />
     </Provider>
   );
 };

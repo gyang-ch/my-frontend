@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 import type { BookRecord } from '../data/books';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -9,6 +10,7 @@ interface BookDetailProps {
   books: BookRecord[];
   period: string;
   onSelectBook?: (book: BookRecord) => void;
+  studioPathForBook?: (book: BookRecord) => string;
 }
 
 const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
@@ -72,7 +74,7 @@ const getMuseumUrl = (book: BookRecord) => {
   return book.manifestUrl; // fallback
 };
 
-export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
+export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook, studioPathForBook }) => {
   const [visibleCount, setVisibleCount] = useState(6);
   const observerTarget = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -110,6 +112,10 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
   const visibleBooks = books.slice(0, visibleCount);
 
   useLayoutEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
     if (!ctxRef.current) {
       ctxRef.current = gsap.context(() => {}, gridRef);
     }
@@ -168,10 +174,23 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
       <h2 className="period-title">Books from {period}</h2>
       <div className="books-grid" ref={gridRef}>
         {visibleBooks.map((book) => (
-          <div 
-            key={book.id} 
-            className="book-card" 
-            onClick={() => onSelectBook && onSelectBook(book)}
+          <article
+            key={book.id}
+            className="book-card"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onSelectBook) onSelectBook(book);
+            }}
+            onKeyDown={(e) => {
+              if (!onSelectBook) return;
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelectBook(book);
+              }
+            }}
+            role={onSelectBook ? 'button' : undefined}
+            tabIndex={onSelectBook ? 0 : -1}
+            aria-label={onSelectBook ? `Open Analysis Studio for ${book.title}` : undefined}
           >
             <div className="book-image-container">
               <SmartImage src={book.thumbnailUrl} alt={book.title} className="book-thumbnail" />
@@ -227,6 +246,16 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
                 <div className="book-footer">
                 <p className="attribution-text">{book.attribution}</p>
                 <div className="footer-actions">
+                  {studioPathForBook && (
+                    <Link
+                      to={studioPathForBook(book)}
+                      className="manifest-link"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`Open Analysis Studio for ${book.title}`}
+                    >
+                      Studio
+                    </Link>
+                  )}
                   <a 
                     href={getMuseumUrl(book)} 
                     target="_blank" 
@@ -239,7 +268,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
                 </div>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
       {visibleCount < books.length && (

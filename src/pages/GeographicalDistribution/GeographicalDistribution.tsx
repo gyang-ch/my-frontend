@@ -15,6 +15,7 @@ export const GeographicalDistribution: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverData, setHoverData] = useState<{ x: number; y: number; count: number } | null>(null);
   const cursorRef = useRef({ x: 0, y: 0 });
+  const [width, setWidth] = useState(Math.min(window.innerWidth - 64, 1200));
 
   useEffect(() => {
     const globePoints = plantPointData.map(point => ({
@@ -24,6 +25,12 @@ export const GeographicalDistribution: React.FC = () => {
     }));
 
     setHexData(globePoints);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(Math.min(window.innerWidth - 64, 1200));
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -52,71 +59,75 @@ export const GeographicalDistribution: React.FC = () => {
     .domain([0, maxWeight]);
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', background: '#f4ecd8' }}>
-      {/* 3D Globe Section */}
-      <div
-        ref={containerRef}
-        style={{ width: '100%', height: '92vh', marginTop: '5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative' }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '-2rem', zIndex: 1 }}>
-          
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f4ecd8', padding: '6rem 2rem 4rem', boxSizing: 'border-box' }}>
+      <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+        
+        {/* Kepler.gl Map Section */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#0f172a', padding: '2rem 0', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <h2 style={{ fontFamily: '"EB Garamond", Georgia, serif', color: '#e2e8f0', marginBottom: '1.5rem', letterSpacing: '0.02em', textAlign: 'center' }}>
+            Detailed Plant Distribution
+          </h2>
+          <KeplerMap width={width} />
         </div>
-        {hoverData && (
-          <div
-            style={{
-              position: 'fixed',
-              left: hoverData.x + 12,
-              top: hoverData.y - 12,
-              background: 'rgba(12, 20, 14, 0.92)',
-              color: '#e2e8f0',
-              padding: '6px 10px',
-              borderRadius: '8px',
-              fontFamily: '"Cinzel", serif',
-              fontSize: '0.75rem',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              pointerEvents: 'none',
-              zIndex: 20,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
-              border: '1px solid rgba(226, 232, 240, 0.2)'
-            }}
-          >
-            Observations: {hoverData.count.toLocaleString()}
-          </div>
-        )}
-        <Globe
-          ref={globeRef}
-          width={window.innerWidth}
-          height={window.innerHeight * 0.9}
-          backgroundColor="rgba(0,0,0,0)"
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-          hexBinPointsData={hexData}
-          hexBinPointWeight="weight"
-          hexAltitude={(d: any) => Math.log10(d.sumWeight + 1) * 0.12}
-          hexBinResolution={4}
-          hexTopColor={(d: any) => weightColor(d.sumWeight)}
-          hexSideColor={(d: any) => weightColor(d.sumWeight)}
-          hexBinMerge={true}
-          enablePointerInteraction={true}
-          onHexHover={(hex: any) => {
-            if (!hex) {
-              setHoverData(null);
-              return;
-            }
-            const count = Math.round(hex.sumWeight ?? 0);
-            const { x, y } = cursorRef.current;
-            setHoverData({ x, y, count });
-          }}
-        />
-      </div>
 
-      {/* Kepler.gl Map Section */}
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#000', padding: '2rem 0' }}>
-        <h2 style={{ fontFamily: '"Cinzel", serif', color: '#e2e8f0', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
-          Detailed Plant Distribution
-        </h2>
-        <KeplerMap />
+        {/* 3D Globe Section */}
+        <div
+          ref={containerRef}
+          style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: '#0f172a', padding: '2rem 0', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
+        >
+          <h2 style={{ fontFamily: '"EB Garamond", Georgia, serif', color: '#e2e8f0', marginBottom: '1.5rem', letterSpacing: '0.02em', textAlign: 'center' }}>
+            Global 3D Overview
+          </h2>
+          {hoverData && (
+            <div
+              style={{
+                position: 'fixed',
+                left: hoverData.x + 12,
+                top: hoverData.y - 12,
+                background: 'rgba(12, 20, 14, 0.92)',
+                color: '#e2e8f0',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                fontFamily: '"EB Garamond", Georgia, serif',
+                fontSize: '0.75rem',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                pointerEvents: 'none',
+                zIndex: 20,
+                boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(226, 232, 240, 0.2)'
+              }}
+            >
+              Observations: {hoverData.count.toLocaleString()}
+            </div>
+          )}
+          <Globe
+            ref={globeRef}
+            width={width}
+            height={800}
+            backgroundColor="rgba(0,0,0,0)"
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+            bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+            hexBinPointsData={hexData}
+            hexBinPointWeight="weight"
+            hexAltitude={(d: any) => Math.log10(d.sumWeight + 1) * 0.12}
+            hexBinResolution={4}
+            hexTopColor={(d: any) => weightColor(d.sumWeight)}
+            hexSideColor={(d: any) => weightColor(d.sumWeight)}
+            hexBinMerge={true}
+            enablePointerInteraction={true}
+            onHexHover={(hex: any) => {
+              if (!hex) {
+                setHoverData(null);
+                return;
+              }
+              const count = Math.round(hex.sumWeight ?? 0);
+              const { x, y } = cursorRef.current;
+              setHoverData({ x, y, count });
+            }}
+          />
+        </div>
+
       </div>
     </div>
   );

@@ -874,17 +874,17 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         }
       `}</style>
       <div className="book-reader" style={{ background: '#2d3748', borderRadius: 0, padding: '2rem 0.75rem', border: 'none', width: '100%', boxSizing: 'border-box' }}>
-        <div className="reader-header" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '1px solid rgba(148, 163, 184, 0.2)', paddingBottom: '1.5rem' }}>
-          <h2 style={{ 
-            margin: 0, 
-            fontFamily: '"Cinzel", serif', 
-            fontSize: '1.5rem', 
-            color: '#f8fafc', 
-            fontWeight: 700,
-            letterSpacing: '1px',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-          }}>{book.title}</h2>
-        </div>
+	        <div className="reader-header" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '1px solid rgba(148, 163, 184, 0.2)', paddingBottom: '1.5rem' }}>
+	          <h2 style={{ 
+	            margin: 0, 
+	            fontFamily: '"EB Garamond", Georgia, serif', 
+	            fontSize: '1.5rem', 
+	            color: '#f8fafc', 
+	            fontWeight: 700,
+	            letterSpacing: '0.3px',
+	            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+	          }}>{book.title}</h2>
+	        </div>
 
         <div className={`reader-layout ${isResizing ? 'resizing' : ''}`} ref={resizerRef} style={{ gridTemplateColumns: `minmax(0, 1fr) auto ${sidePanelWidth}px` }}>
           <div className="viewer-main">
