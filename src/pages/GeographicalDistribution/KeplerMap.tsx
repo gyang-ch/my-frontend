@@ -44,7 +44,8 @@ const Map = ({ width }: { width: number }) => {
         },
         option: {
           centerMap: true,
-          readOnly: false
+          readOnly: false,
+          keepExistingConfig: false
         },
         config: {
           visState: {
@@ -56,21 +57,16 @@ const Map = ({ width }: { width: number }) => {
                 config: {
                   dataId: 'plant_data',
                   label: 'Density Heatmap',
-                  color: [255, 204, 0],
-                  columns: {
-                    lat: 'lat',
-                    lng: 'lng'
-                  },
                   isVisible: true,
                   visConfig: {
-                    opacity: 0.8,
+                    opacity: 0.85,
                     colorRange: {
-                      name: 'Global Warming',
+                      name: 'Magenta',
                       type: 'sequential',
                       category: 'Uber',
-                      colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300']
+                      colors: ['#310230', '#790971', '#B010A5', '#D440D0', '#E987E8', '#FFCFFF']
                     },
-                    radius: 20
+                    radius: 25
                   }
                 },
                 visualChannels: {
@@ -79,31 +75,29 @@ const Map = ({ width }: { width: number }) => {
                 }
               },
               {
-                id: 'point',
-                type: 'point',
+                id: 'hexagon-bars',
+                type: 'hexagon',
                 config: {
                   dataId: 'plant_data',
-                  label: 'Observations',
-                  color: [24, 144, 255],
-                  columns: {
-                    lat: 'lat',
-                    lng: 'lng'
-                  },
-                  isVisible: false,
+                  label: 'Distribution Bars',
+                  isVisible: true,
                   visConfig: {
-                    radius: 10,
-                    fixedRadius: false,
                     opacity: 0.8,
-                    outline: false,
-                    thickness: 2,
-                    strokeColor: null,
+                    worldUnitSize: 50,
+                    resolution: 8,
                     colorRange: {
-                      name: 'Global Warming',
+                      name: 'Magenta',
                       type: 'sequential',
                       category: 'Uber',
-                      colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300']
+                      colors: ['#310230', '#790971', '#B010A5', '#D440D0', '#E987E8', '#FFCFFF']
                     },
-                    radiusRange: [0, 50]
+                    coverage: 1,
+                    sizeRange: [0, 500],
+                    percentile: [0, 100],
+                    elevationPercentile: [0, 100],
+                    elevationScale: 100,
+                    enable3d: true,
+                    fixedRadius: false
                   }
                 },
                 visualChannels: {
@@ -120,16 +114,34 @@ const Map = ({ width }: { width: number }) => {
                   plant_data: [{ name: 'count', format: null }]
                 },
                 enabled: true
+              },
+              brush: {
+                size: 0.5,
+                enabled: false
+              },
+              geocoder: {
+                enabled: false
+              },
+              coordinate: {
+                enabled: false
               }
+            },
+            mapControls: {
+              mapLocale: { show: false, active: false },
+              toggle3d: { show: true, active: false },
+              splitMap: { show: false, active: false },
+              mapLegend: { show: true, active: false },
+              mapDraw: { show: false, active: false },
+              mapStyle: { show: true, active: false }
             }
           },
           mapState: {
             bearing: 0,
-            dragRotate: false,
-            latitude: 45,
-            longitude: 10,
-            pitch: 0,
-            zoom: 3,
+            dragRotate: true,
+            latitude: 20,
+            longitude: 0,
+            pitch: 40,
+            zoom: 1.5,
             isSplit: false
           },
           mapStyle: {
@@ -137,9 +149,9 @@ const Map = ({ width }: { width: number }) => {
             topLayerGroups: {},
             visibleLayerGroups: {
               label: true,
-              road: true,
-              border: false,
-              building: true,
+              road: false,
+              border: true,
+              building: false,
               water: true,
               land: true,
               '3d building': false
@@ -151,7 +163,125 @@ const Map = ({ width }: { width: number }) => {
   }, [dispatch]);
 
   return (
-    <div style={{ width: `${width}px`, height: '800px', position: 'relative' }}>
+    <div style={{ width: `${width}px`, height: '800px', position: 'relative' }} className="kepler-map-container">
+      <style>{`
+        /* Seadragon-style Kepler.gl Customization */
+        
+        /* Side Panel Beautification */
+        .kepler-map-container .side-panel__container {
+          background-color: rgba(15, 23, 42, 0.85) !important;
+          backdrop-filter: blur(12px) !important;
+          border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .kepler-map-container .side-panel__header {
+          background-color: transparent !important;
+        }
+
+        /* Beautify the Fold/Expand Toggle Button */
+        .kepler-map-container .side-panel__panel-toggle {
+          position: absolute !important;
+          right: -16px !important;
+          top: 24px !important;
+          z-index: 100 !important;
+        }
+
+        .kepler-map-container .side-panel__panel-toggle button {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 50% !important;
+          background-color: #ffffff !important;
+          color: #334155 !important;
+          border: 1px solid #e2e8f0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          cursor: pointer !important;
+          margin: 0 !important;
+        }
+
+        .kepler-map-container .side-panel__panel-toggle button:hover {
+          background-color: #0d9488 !important;
+          color: #ffffff !important;
+          border-color: #14b8a6 !important;
+          transform: scale(1.1) !important;
+          box-shadow: 0 0 15px rgba(13, 148, 136, 0.5) !important;
+        }
+
+        .kepler-map-container .side-panel__panel-toggle button svg {
+          width: 16px !important;
+          height: 16px !important;
+          fill: currentColor !important;
+        }
+
+        .kepler-map-container .map-control {
+          top: 16px !important;
+          right: 16px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 12px !important;
+        }
+
+        /* Specifically hide the language/locale button */
+        .kepler-map-container .locale-panel,
+        .kepler-map-container .map-control-button.locale-control,
+        .kepler-map-container [class*="locale"] {
+          display: none !important;
+        }
+
+        .kepler-map-container .map-control-button {
+          position: relative !important;
+          width: 40px !important;
+          height: 40px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border-radius: 8px !important;
+          border: 1px solid #e2e8f0 !important;
+          background-color: rgba(255, 255, 255, 0.95) !important;
+          color: #334155 !important;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+          transition: all 0.2s !important;
+          cursor: pointer !important;
+          padding: 0 !important;
+          margin-bottom: 0 !important;
+        }
+
+        .kepler-map-container .map-control-button:hover {
+          background-color: #0d9488 !important;
+          color: #ffffff !important;
+          border-color: #14b8a6 !important;
+          transform: scale(1.05) !important;
+          box-shadow: 0 0 12px rgba(13, 148, 136, 0.4) !important;
+        }
+
+        .kepler-map-container .map-control-button:active {
+          transform: scale(0.95) !important;
+        }
+
+        .kepler-map-container .map-control-button svg {
+          width: 20px !important;
+          height: 20px !important;
+          fill: currentColor !important;
+        }
+
+        /* Hide the default tooltip in buttons if any */
+        .kepler-map-container .map-control-button::before {
+          display: none !important;
+        }
+
+        /* Customize legend to match */
+        .kepler-map-container .map-control .map-legend {
+          background-color: rgba(255, 255, 255, 0.95) !important;
+          color: #334155 !important;
+          border: 1px solid #e2e8f0 !important;
+          border-radius: 12px !important;
+          padding: 16px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+      `}</style>
       {!mapboxToken && (
         <div
           style={{
@@ -164,7 +294,7 @@ const Map = ({ width }: { width: number }) => {
             textAlign: 'center',
             color: '#e2e8f0',
             background: 'rgba(0,0,0,0.6)',
-            zIndex: 2
+            zIndex: 10
           }}
         >
           Map is unavailable because VITE_MAPBOX_TOKEN is not set.
@@ -175,6 +305,9 @@ const Map = ({ width }: { width: number }) => {
         mapboxApiAccessToken={mapboxToken}
         width={width}
         height={800}
+        appName="Plant Distribution"
+        version="v1.0"
+        sidePanelWidth={280}
       />
     </div>
   );

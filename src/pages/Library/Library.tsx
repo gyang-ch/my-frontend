@@ -108,26 +108,6 @@ export function LibraryPage() {
 
   return (
     <>
-      <section className="home-inline" aria-label="Home">
-        <div className="home-inline-inner">
-          <div className="home-inline-title">Home</div>
-          <div className="home-inline-links" role="list">
-            <button type="button" className="home-inline-chip" onClick={() => navigate('/home')}>
-              Open home
-            </button>
-            <button type="button" className="home-inline-chip" onClick={() => navigate('/storyline')}>
-              Storyline
-            </button>
-            <button type="button" className="home-inline-chip" onClick={() => navigate('/geography')}>
-              Geography
-            </button>
-            <button type="button" className="home-inline-chip" onClick={() => navigate('/studio')}>
-              Studio
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section className="timeline-section">
         <div
           style={{
