@@ -464,35 +464,133 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       const imageUrl = infoUrl.replace('info.json', 'full/1000,/0/default.jpg');
       
       setOcrDebug({
-        status: "Processing Qwen...",
+        status: "Processing Qwen (Frontend)...",
         requestedUrl: imageUrl,
         lang: "auto",
       });
-      
-      const response = await fetch(`${API_BASE_URL}/api/process-qwen?url=${encodeURIComponent(imageUrl)}`);
-      const result = await response.json();
-      
-      if (result.status === 'success') {
-        setOcrResults(result.data);
-        setImageSize({ width: result.width, height: result.height });
-        setCurrentOcrUrl(imageUrl);
-        setOcrDebug({
-          status: "Completed",
-          requestedUrl: result.requested_url || imageUrl,
-          processedWidth: result.processed_width,
-          processedHeight: result.processed_height,
-          originalWidth: result.width,
-          originalHeight: result.height,
-          segmentation: result.segmentation,
-          textDirection: result.text_direction,
-          lang: result.lang
-        });
-      } else {
-        alert("Qwen transcription failed: " + (result.detail || "Unknown error"));
+
+      let originalWidth = 1000;
+      let originalHeight = 1000;
+      try {
+        const infoRes = await fetch(infoUrl);
+        const infoData = await infoRes.json();
+        if (infoData.width) originalWidth = infoData.width;
+        if (infoData.height) originalHeight = infoData.height;
+      } catch (e) {
+        console.warn("Could not fetch info.json", e);
       }
+
+      const promptText = "Perform exhaustive OCR on this entire image. The image may contain a two-page spread (left and right pages); ensure you transcribe ALL text on BOTH pages. The document may be handwritten or printed, and in any language (such as Chinese, Latin, Arabic, English, French, etc.). Note that Chinese and Japanese text may be written in vertical columns from top to bottom, reading right to left. For vertical text, the bounding box should be tall and narrow. For horizontal text, it should be short and wide. Return the text for each line along with its bounding box strictly in the format:\n[ymin, xmin, ymax, xmax] transcribed_text\nEnsure coordinates are between 0 and 1000. Do not include any extra commentary.";
+      
+      const response = await fetch("https://api.together.xyz/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${import.meta.env.VITE_TOGETHER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "Qwen/Qwen3-VL-8B-Instruct",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: promptText },
+                { type: "image_url", image_url: { url: imageUrl } }
+              ]
+            }
+          ],
+          max_tokens: 2048,
+          temperature: 0.1
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Together API error: ${response.status} ${response.statusText}`);
+      }
+      const result = await response.json();
+      const content = result.choices[0]?.message?.content || "";
+      console.log("=== QWEN RAW OUTPUT ===");
+      console.log(content);
+      console.log("=======================");
+
+      const lines = content.split('\n');
+      const parsed_lines: OCRResult[] = [];
+      const pattern = /\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]\s*(.+)/;
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        const match = line.match(pattern);
+        if (match) {
+          const y1 = parseInt(match[1], 10);
+          const x1 = parseInt(match[2], 10);
+          const y2 = parseInt(match[3], 10);
+          const x2 = parseInt(match[4], 10);
+          const text = match[5].trim();
+          
+          const px1 = (x1 / 1000.0) * originalWidth;
+          const py1 = (y1 / 1000.0) * originalHeight;
+          const px2 = (x2 / 1000.0) * originalWidth;
+          const py2 = (y2 / 1000.0) * originalHeight;
+          
+          parsed_lines.push({
+            text: text,
+            baseline: [],
+            boundary: [
+              [px1, py1],
+              [px2, py1],
+              [px2, py2],
+              [px1, py2]
+            ],
+            confidence: 1.0
+          });
+        } else {
+          parsed_lines.push({
+            text: line,
+            baseline: [],
+            boundary: [
+              [0, 0],
+              [originalWidth, 0],
+              [originalWidth, originalHeight],
+              [0, originalHeight]
+            ],
+            confidence: 1.0
+          });
+        }
+      }
+      
+      if (parsed_lines.length === 0 && content.trim()) {
+         parsed_lines.push({
+            text: content,
+            baseline: [],
+            boundary: [
+              [0, 0],
+              [originalWidth, 0],
+              [originalWidth, originalHeight],
+              [0, originalHeight]
+            ],
+            confidence: 1.0
+          });
+      }
+
+      setOcrResults(parsed_lines);
+      setImageSize({ width: originalWidth, height: originalHeight });
+      setCurrentOcrUrl(imageUrl);
+      setOcrDebug({
+        status: "Completed",
+        requestedUrl: imageUrl,
+        processedWidth: originalWidth,
+        processedHeight: originalHeight,
+        originalWidth: originalWidth,
+        originalHeight: originalHeight,
+        segmentation: "Qwen3",
+        textDirection: "auto",
+        lang: "auto"
+      });
+      
     } catch (err) {
       console.error(err);
-      alert("Error connecting to backend Qwen transcription service.");
+      alert("Error executing Qwen transcription on frontend.");
     } finally {
       setIsQwenTranscribing(false);
     }
