@@ -14,7 +14,7 @@ const prefersReducedMotion = () =>
   window.matchMedia &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export const scrollToContent = (heroRef: React.RefObject<HTMLElement>) => {
+export const scrollToContent = (heroRef: React.RefObject<HTMLElement | null>) => {
   const top = heroRef.current?.offsetHeight || 0;
   window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }

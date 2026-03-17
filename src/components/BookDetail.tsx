@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
 import type { BookRecord } from '../data/books';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -74,7 +73,7 @@ const getMuseumUrl = (book: BookRecord) => {
   return book.manifestUrl; // fallback
 };
 
-export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook, studioPathForBook }) => {
+export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
   const [visibleCount, setVisibleCount] = useState(6);
   const observerTarget = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
