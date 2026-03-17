@@ -236,10 +236,9 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
           background-color: #0d9488;
           color: #ffffff;
           border-color: #14b8a6;
-          transform: scale(1.05);
         }
         .osd-btn:active {
-          transform: scale(0.95);
+          background-color: #0f766e;
         }
       `}</style>
 

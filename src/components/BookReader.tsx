@@ -21,6 +21,7 @@ interface OCRDebugInfo {
   textDirection?: string;
   lang?: string;
   status?: string;
+  rawOutput?: string;
 }
 
 const ThumbnailImage: React.FC<{ src: string; isSelected: boolean; isNearSelected: boolean; alt: string }> = ({ src, isSelected, isNearSelected, alt }) => {
@@ -204,6 +205,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   // OCR States
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isQwenTranscribing, setIsQwenTranscribing] = useState(false);
+  const [qwenThinking, setQwenThinking] = useState<string | null>(null);
   const [ocrResults, setOcrResults] = useState<OCRResult[]>([]);
   const [characterBoxes, setCharacterBoxes] = useState<CharacterBox[]>([]);
   
@@ -460,6 +462,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
     
     try {
       setIsQwenTranscribing(true);
+      setQwenThinking(""); // Initialize to empty string so Thinking UI appears immediately
       setOcrResults([]);
       setCharacterBoxes([]);
       setTranslatedText(null);
@@ -488,8 +491,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       const promptText = `You are a professional OCR engine. Your task is to perform exhaustive literal transcription of ALL text found in the provided image. 
 Do NOT describe the image. Do NOT summarize the content. Do NOT provide any commentary or metadata. 
 The image may contain a two-page spread; transcribe ALL text on BOTH pages. 
-The document may be in any language (Arabic, Latin, Chinese, etc.) and may be handwritten or printed. 
+The document may be in any language (Arabic, Latin, European languages, Chinese, etc.) and may be handwritten or printed. 
 Transcribe the text EXACTLY as it appears, in its original script/language.
+
+CRITICAL INSTRUCTION ON BOUNDING BOXES:
+You MUST provide a UNIQUE and ACCURATE bounding box for EVERY SINGLE LINE of text. 
+Do NOT copy and paste the same bounding box for multiple lines. Each bounding box must strictly correspond to the actual physical location of the transcribed line on the image.
 
 For each line of text, you MUST provide the bounding box and the transcribed text in this EXACT format:
 [ymin, xmin, ymax, xmax] transcribed_text
@@ -500,8 +507,10 @@ Output ONLY the transcribed lines in the specified format.
 Example Output:
 [120, 250, 160, 750] This is a line of text in English.
 [180, 260, 220, 740] هذه جملة باللغة العربية.
-[240, 270, 280, 730] 这是一行中文文本。`;
+[240, 270, 280, 730] 這是一行中文文本。`;
       
+      setOcrDebug(prev => prev ? { ...prev, status: "Waiting for Together API..." } : null);
+
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -509,7 +518,7 @@ Example Output:
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen3-VL-8B-Instruct",
+          model: "Qwen/Qwen3.5-9B",
           messages: [
             {
               role: "user",
@@ -519,7 +528,8 @@ Example Output:
               ]
             }
           ],
-          max_tokens: 2048,
+          max_tokens: 32768,
+          stream: true,
           temperature: 0.1
         })
       });
@@ -527,27 +537,82 @@ Example Output:
       if (!response.ok) {
         throw new Error(`Together API error: ${response.status} ${response.statusText}`);
       }
-      const result = await response.json();
-      const content = result.choices[0]?.message?.content || "";
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Could not get response reader");
+      
+      const decoder = new TextDecoder();
+      let rawContent = "";
+      let fullReasoning = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter(line => line.trim() !== "");
+
+        for (const line of lines) {
+          const message = line.replace(/^data: /, "");
+          if (message === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(message);
+            const delta = parsed.choices[0].delta;
+
+            // 1. Update the "Thinking" UI
+            if (delta.reasoning_content) {
+              fullReasoning += delta.reasoning_content;
+              setQwenThinking(fullReasoning);
+            } else if (delta.content && delta.content.includes("<think>")) {
+              // Some models put thinking in content (e.g. DeepSeek-R1-Distill-Qwen)
+              const thinkPart = delta.content.split("</think>")[0].replace("<think>", "");
+              fullReasoning += thinkPart;
+              setQwenThinking(fullReasoning);
+            }
+
+            // 2. Update the "Transcription" UI
+            if (delta.content) {
+              rawContent += delta.content;
+            }
+          } catch (_e) { /* handle partial chunk errors */ }
+        }
+      }
+
+      // Combine reasoning into content if it's missing the <think> tag (Together AI quirk)
+      if (fullReasoning && !rawContent.includes("<think>")) {
+        rawContent = `<think>\n${fullReasoning}\n</think>\n${rawContent}`;
+      }
+      
+      setOcrDebug(prev => prev ? { ...prev, status: "Parsing Output..." } : null);
+      
       console.log("=== QWEN RAW OUTPUT ===");
-      console.log(content);
+      console.log(rawContent);
       console.log("=======================");
 
-      const lines = content.split('\n');
-      const parsed_lines: OCRResult[] = [];
-      const pattern = /\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\]\s*(.+)/;
+      if (!rawContent.trim()) {
+        console.warn("Qwen returned empty content.");
+      }
 
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
-        const match = line.match(pattern);
+      const parsed_lines: OCRResult[] = [];
+      const lines = rawContent.split('\n');
+      const pattern = /(?:\[|\()?\s*(\d+)\s*,\s*(\d+)\s*(?:\]|\)|,)\s*(?:\[|\()?(\d+)\s*,\s*(\d+)\s*(?:\]|\))?\s*(?::|-)?\s*(.+)/;
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+        
+        // Skip reasoning blocks
+        if (trimmedLine === "<think>" || trimmedLine === "</think>" || trimmedLine.startsWith("```")) {
+          continue;
+        }
+        
+        const match = trimmedLine.match(pattern);
         if (match) {
-          // Swapping indices to test X/Y swap as requested: 
-          // index 1 becomes x, index 2 becomes y, etc.
-          const x1 = parseInt(match[1], 10);
-          const y1 = parseInt(match[2], 10);
-          const x2 = parseInt(match[3], 10);
-          const y2 = parseInt(match[4], 10);
+          const y1 = parseInt(match[1], 10);
+          const x1 = parseInt(match[2], 10);
+          const y2 = parseInt(match[3], 10);
+          const x2 = parseInt(match[4], 10);
           const text = match[5].trim();
           
           const px1 = (x1 / 1000.0) * originalWidth;
@@ -556,58 +621,46 @@ Example Output:
           const py2 = (y2 / 1000.0) * originalHeight;
           
           parsed_lines.push({
-            text: text,
-            baseline: [],
-            boundary: [
-              [px1, py1],
-              [px2, py1],
-              [px2, py2],
-              [px1, py2]
-            ],
-            confidence: 1.0
+            text, baseline: [], boundary: [[px1, py1], [px2, py1], [px2, py2], [px1, py2]], confidence: 1.0
           });
-        } else {
+        } else if (!trimmedLine.match(/^[a-zA-Z0-9\s]+$/) && trimmedLine.length > 5) {
+          // Fallback
           parsed_lines.push({
-            text: line,
+            text: trimmedLine,
             baseline: [],
-            boundary: [
-              [0, 0],
-              [originalWidth, 0],
-              [originalWidth, originalHeight],
-              [0, originalHeight]
-            ],
+            boundary: [[0, 0], [originalWidth, 0], [originalWidth, originalHeight], [0, originalHeight]],
             confidence: 1.0
           });
         }
       }
       
-      if (parsed_lines.length === 0 && content.trim()) {
+      let finalStatus = "Completed";
+      if (parsed_lines.length === 0 && rawContent.trim()) {
          parsed_lines.push({
-            text: content,
+            text: "No formatted lines found. See raw output.",
             baseline: [],
-            boundary: [
-              [0, 0],
-              [originalWidth, 0],
-              [originalWidth, originalHeight],
-              [0, originalHeight]
-            ],
+            boundary: [[0, 0], [originalWidth, 0], [originalWidth, originalHeight], [0, originalHeight]],
             confidence: 1.0
           });
+          finalStatus = "Parsing Failed (Regex)";
       }
 
       setOcrResults(parsed_lines);
+      setQwenThinking(null); // Clear thinking ONLY AFTER results are set to avoid flicker
       setImageSize({ width: originalWidth, height: originalHeight });
       setCurrentOcrUrl(imageUrl);
+      
       setOcrDebug({
-        status: "Completed",
+        status: finalStatus,
         requestedUrl: imageUrl,
         processedWidth: originalWidth,
         processedHeight: originalHeight,
         originalWidth: originalWidth,
         originalHeight: originalHeight,
-        segmentation: "Qwen3",
+        segmentation: "Qwen3.5",
         textDirection: "auto",
-        lang: "auto"
+        lang: "auto",
+        rawOutput: rawContent
       });
       
     } catch (err) {
@@ -666,12 +719,6 @@ Example Output:
           outline: none;
           overflow: hidden;
           border-radius: 10px;
-        }
-        .glow-btn-group:hover {
-          transform: scale(1.03);
-        }
-        .glow-btn-group:active {
-          transform: scale(0.97);
         }
         .glow-btn-group.transcribe-btn-new {
           background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
@@ -924,11 +971,9 @@ Example Output:
         .strip-thumb-btn.selected {
           border-color: #3b82f6;
           box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-          transform: scale(1.05);
         }
         .strip-thumb-btn:hover:not(.selected) {
           border-color: #64748b;
-          transform: translateY(-2px);
         }
 
         .thumb-label {
@@ -1002,6 +1047,25 @@ Example Output:
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
           display: inline-block;
+        }
+
+        .osd-btn {
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .osd-btn:hover:not(:disabled) {
+          background: #475569 !important;
+          border-color: #64748b !important;
+          color: #ffffff !important;
+        }
+        .osd-btn.copy-transcription-btn:hover:not(:disabled) {
+          background: rgba(59, 130, 246, 0.1) !important;
+          border-color: #3b82f6 !important;
+          color: #60a5fa !important;
+        }
+        .osd-btn.translate-btn:hover:not(:disabled) {
+          background: rgba(59, 130, 246, 0.1) !important;
+          border-color: #3b82f6 !important;
+          color: #60a5fa !important;
         }
       `}</style>
       <div className="book-reader" style={{ background: '#2d3748', borderRadius: 0, padding: '2rem 0.75rem', border: 'none', width: '100%', boxSizing: 'border-box' }}>
@@ -1253,10 +1317,10 @@ Example Output:
               </button>
             </div>
 
-            {(ocrResults.length > 0 || plantDetections.length > 0) ? (
+            {(ocrResults.length > 0 || plantDetections.length > 0 || qwenThinking !== null || isQwenTranscribing) ? (
               <div className="side-results-container">
                 {plantDetections.length > 0 && (
-                  <div className="plant-results-list" style={{ padding: '0.8rem 1.25rem 1rem 1.25rem', borderBottom: ocrResults.length > 0 ? '1px solid #4a5568' : 'none' }}>
+                  <div className="plant-results-list" style={{ padding: '0.8rem 1.25rem 1rem 1.25rem', borderBottom: (ocrResults.length > 0 || qwenThinking !== null || isQwenTranscribing) ? '1px solid #4a5568' : 'none' }}>
                     <h4 style={{ 
                       color: '#94a3b8', 
                       fontWeight: '700', 
@@ -1289,7 +1353,7 @@ Example Output:
                     </div>                  </div>
                 )}
 
-                {ocrResults.length > 0 && (
+                {(ocrResults.length > 0 || qwenThinking !== null || isQwenTranscribing) && (
                   <div className="transcription-results" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div className="transcription-shell" style={{ border: 'none', background: 'transparent', boxShadow: 'none', height: '100%' }}>
                       <div className="results-header" style={{ border: 'none', background: 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1299,7 +1363,7 @@ Example Output:
                           fontSize: '0.95rem', 
                           letterSpacing: '0.08em', 
                           margin: '0.3rem 0 0 0.65rem' 
-                        }}>Transcription</h4>
+                        }}>{qwenThinking !== null ? 'Qwen AI Reasoning' : 'Transcription'}</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.65rem', marginTop: '0.3rem' }}>
                           <button
                             onClick={handleCopyTranscription}
@@ -1318,10 +1382,7 @@ Example Output:
                               fontSize: '0.75rem',
                               fontWeight: '700',
                               opacity: ocrResults.length === 0 ? 0.6 : 1,
-                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px',
-                              boxShadow: isCopied ? '0 0 10px rgba(16, 185, 129, 0.3)' : 'none'
+                              letterSpacing: '0.5px'
                             }}
                             title="Copy all transcription to clipboard"
                           >
@@ -1354,8 +1415,6 @@ Example Output:
                               fontSize: '0.75rem',
                               fontWeight: '700',
                               opacity: (isTranslating || ocrResults.length === 0) ? 0.6 : 1,
-                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                              textTransform: 'uppercase',
                               letterSpacing: '0.5px'
                             }}
                             title="Translate to English"
@@ -1375,99 +1434,134 @@ Example Output:
                         </div>
                       </div>
                       <div className="text-display-panel" style={{ position: 'relative', flex: 1, overflow: 'auto' }}>
-                        <div style={{ width: 'max-content', minWidth: '100%', position: 'relative', padding: '10px 0' }}>
-                          <div
-                            contentEditable
-                            suppressContentEditableWarning
-                            style={{
-                              outline: 'none',
-                              color: '#e2e8f0',
-                              whiteSpace: 'pre',
-                              lineHeight: 1.6,
-                              paddingLeft: '32px',
-                              paddingRight: '48px',
-                              minHeight: '100%',
-                              cursor: 'text'
-                            }}
-                            onMouseMove={(e) => {
-                              const style = window.getComputedStyle(e.currentTarget);
-                              const fontSize = parseFloat(style.fontSize) || 16;
-                              const lineHeight = 1.6 * fontSize;
-                              const idx = Math.floor(e.nativeEvent.offsetY / lineHeight);
-                              if (idx >= 0 && idx < ocrResults.length) {
-                                if (highlightIndex !== idx) setHighlightIndex(idx);
-                              } else {
-                                if (highlightIndex !== null) setHighlightIndex(null);
-                              }
-                            }}
-                            onMouseLeave={() => setHighlightIndex(null)}
-                            onBlur={(e) => {
-                              const lines = (e.currentTarget.textContent || '').split('\n');
-                              const newResults = lines.map((text, i) => {
-                                return ocrResults[i] ? { ...ocrResults[i], text } : { boundary: [], baseline: [], confidence: 1, text };
-                              });
-                              setOcrResults(newResults.slice(0, Math.max(ocrResults.length, lines.length)));
-                            }}
-                          >
-                            {ocrResults.map((line) => line.text).join('\n')}
+                        {qwenThinking !== null ? (
+                          <div style={{
+                            padding: '24px',
+                            color: '#94a3b8',
+                            whiteSpace: 'pre-wrap',
+                            fontSize: '0.85rem',
+                            lineHeight: 1.6,
+                            fontFamily: 'monospace',
+                            background: 'rgba(15, 23, 42, 0.3)',
+                            minHeight: '100%'
+                          }}>
+                            <div style={{ 
+                              marginBottom: '16px', 
+                              color: '#63b3ed', 
+                              fontWeight: 800, 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '10px', 
+                              fontSize: '0.7rem', 
+                              textTransform: 'uppercase', 
+                              letterSpacing: '0.1em' 
+                            }}>
+                              <div className="btn-loader" style={{ 
+                                width: '12px', 
+                                height: '12px', 
+                                margin: 0, 
+                                border: '2px solid rgba(99, 179, 237, 0.2)', 
+                                borderTop: '2px solid #63b3ed' 
+                              }}></div>
+                              Qwen AI Thinking...
+                            </div>
+                            {qwenThinking || "Waiting for reasoning process..."}
                           </div>
+                        ) : (
+                          <div style={{ width: 'max-content', minWidth: '100%', position: 'relative', padding: '10px 0' }}>
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              style={{
+                                outline: 'none',
+                                color: '#e2e8f0',
+                                whiteSpace: 'pre',
+                                lineHeight: 1.6,
+                                paddingLeft: '32px',
+                                paddingRight: '48px',
+                                minHeight: '100%',
+                                cursor: 'text'
+                              }}
+                              onMouseMove={(e) => {
+                                const style = window.getComputedStyle(e.currentTarget);
+                                const fontSize = parseFloat(style.fontSize) || 16;
+                                const lineHeight = 1.6 * fontSize;
+                                const idx = Math.floor(e.nativeEvent.offsetY / lineHeight);
+                                if (idx >= 0 && idx < ocrResults.length) {
+                                  if (highlightIndex !== idx) setHighlightIndex(idx);
+                                } else {
+                                  if (highlightIndex !== null) setHighlightIndex(null);
+                                }
+                              }}
+                              onMouseLeave={() => setHighlightIndex(null)}
+                              onBlur={(e) => {
+                                const lines = (e.currentTarget.textContent || '').split('\n');
+                                const newResults = lines.map((text, i) => {
+                                  return ocrResults[i] ? { ...ocrResults[i], text } : { boundary: [], baseline: [], confidence: 1, text };
+                                });
+                                setOcrResults(newResults.slice(0, Math.max(ocrResults.length, lines.length)));
+                              }}
+                            >
+                              {ocrResults.map((line) => line.text).join('\n')}
+                            </div>
 
-                          <div style={{ position: 'absolute', top: '12px', left: 0, bottom: '12px', width: '100%', pointerEvents: 'none' }}>
-                            {ocrResults.map((line, idx) => (
-                              <div 
-                                key={idx}
-                                className={`text-line-overlay ${highlightIndex === idx ? 'highlighted' : ''}`}
-                                style={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  height: `${1.6}em`,
-                                  pointerEvents: 'none',
-                                  position: 'absolute',
-                                  top: `${idx * 1.6}em`,
-                                  left: 0,
-                                  right: 0,
-                                  padding: '0 8px',
-                                  boxSizing: 'border-box'
-                                }}
-                              >
-                                <span 
-                                  className="line-no" 
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  onMouseLeave={() => setHighlightIndex(null)}
-                                  style={{ pointerEvents: 'auto', userSelect: 'none', width: '24px', opacity: 0.7, fontSize: '0.85em', paddingTop: '0.15em' }}
-                                >
-                                  {idx + 1}
-                                </span>
-                                
-                                <button
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(line.text || '').then(() => {});
-                                  }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; setHighlightIndex(idx); }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.3'; setHighlightIndex(null); }}
-                                  title="Copy row"
+                            <div style={{ position: 'absolute', top: '12px', left: 0, bottom: '12px', width: '100%', pointerEvents: 'none' }}>
+                              {ocrResults.map((line, idx) => (
+                                <div 
+                                  key={idx}
+                                  className={`text-line-overlay ${highlightIndex === idx ? 'highlighted' : ''}`}
                                   style={{
-                                    pointerEvents: 'auto',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    padding: '2px',
-                                    color: '#e2e8f0',
-                                    opacity: 0.3,
-                                    transition: 'opacity 0.2s',
-                                    userSelect: 'none',
-                                    zIndex: 10
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    height: `${1.6}em`,
+                                    pointerEvents: 'none',
+                                    position: 'absolute',
+                                    top: `${idx * 1.6}em`,
+                                    left: 0,
+                                    right: 0,
+                                    padding: '0 8px',
+                                    boxSizing: 'border-box'
                                   }}
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                  </svg>
-                                </button>
-                              </div>
-                            ))}
+                                  <span 
+                                    className="line-no" 
+                                    onMouseEnter={() => setHighlightIndex(idx)}
+                                    onMouseLeave={() => setHighlightIndex(null)}
+                                    style={{ pointerEvents: 'auto', userSelect: 'none', width: '24px', opacity: 0.7, fontSize: '0.85em', paddingTop: '0.15em' }}
+                                  >
+                                    {idx + 1}
+                                  </span>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(line.text || '').then(() => {});
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; setHighlightIndex(idx); }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.3'; setHighlightIndex(null); }}
+                                    title="Copy row"
+                                    style={{
+                                      pointerEvents: 'auto',
+                                      background: 'transparent',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      padding: '2px',
+                                      color: '#e2e8f0',
+                                      opacity: 0.3,
+                                      transition: 'opacity 0.2s',
+                                      userSelect: 'none',
+                                      zIndex: 10
+                                    }}
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {translatedText && (
@@ -1493,7 +1587,6 @@ Example Output:
                           </div>
                         </div>
                       )}
-
                     </div>
                   </div>
                 )}
@@ -1538,6 +1631,24 @@ Example Output:
             {ocrDebug.processedWidth && <div><strong>Processed Image:</strong> {ocrDebug.processedWidth} x {ocrDebug.processedHeight}</div>}
             {ocrDebug.originalWidth && <div><strong>Original Page:</strong> {ocrDebug.originalWidth} x {ocrDebug.originalHeight}</div>}
             <div style={{ wordBreak: 'break-all' }}><strong>Requested URL:</strong> {ocrDebug.requestedUrl || currentOcrUrl}</div>
+            {ocrDebug.rawOutput && (
+              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(71, 85, 105, 0.4)' }}>
+                <strong>Raw Output:</strong>
+                <pre style={{ 
+                  background: 'rgba(0,0,0,0.3)', 
+                  padding: '8px', 
+                  borderRadius: '4px', 
+                  overflowY: 'auto', 
+                  maxHeight: '150px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  marginTop: '6px',
+                  fontSize: '11px'
+                }}>
+                  {ocrDebug.rawOutput}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </div>

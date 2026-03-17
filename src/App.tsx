@@ -95,7 +95,7 @@ function App() {
         <div className="hero-content" ref={heroTextRef}>
           <h1>
             Computational Analysis of <br />
-            <span className="hero-gradient">Global Scientific Iconography</span>
+            <span className="hero-gradient">Global Botanical Iconography</span>
           </h1>
           <p className="subtitle">Exploring the intersection of art history, science, and digital humanities.</p>
         </div>
