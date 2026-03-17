@@ -3,11 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { bookData } from '../../data/books'
 import { BookReader } from '../../components/BookReader'
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export function StudioPage() {
   const { bookId } = useParams()
   const navigate = useNavigate()
@@ -54,7 +49,6 @@ export function StudioPage() {
       book={selectedBook}
       onBack={() => {
         navigate('/library')
-        window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
       }}
     />
   )

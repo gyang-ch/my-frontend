@@ -133,8 +133,13 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
-  const [jumpPage, setJumpPage] = useState('');
+  const [pageInput, setPageInput] = useState((selectedPageIndex + 1).toString());
   const thumbnailsRowRef = useRef<HTMLDivElement>(null);
+
+  // Sync pageInput with selectedPageIndex
+  useEffect(() => {
+    setPageInput((selectedPageIndex + 1).toString());
+  }, [selectedPageIndex]);
 
   // Synchronize thumbnail scrolling
   useEffect(() => {
@@ -480,7 +485,22 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         console.warn("Could not fetch info.json", e);
       }
 
-      const promptText = "Perform exhaustive OCR on this entire image. The image may contain a two-page spread (left and right pages); ensure you transcribe ALL text on BOTH pages. The document may be handwritten or printed, and in any language (such as Chinese, Latin, Arabic, English, French, etc.). Note that Chinese and Japanese text may be written in vertical columns from top to bottom, reading right to left. For vertical text, the bounding box should be tall and narrow. For horizontal text, it should be short and wide. Return the text for each line along with its bounding box strictly in the format:\n[ymin, xmin, ymax, xmax] transcribed_text\nEnsure coordinates are between 0 and 1000. Do not include any extra commentary.";
+      const promptText = `You are a professional OCR engine. Your task is to perform exhaustive literal transcription of ALL text found in the provided image. 
+Do NOT describe the image. Do NOT summarize the content. Do NOT provide any commentary or metadata. 
+The image may contain a two-page spread; transcribe ALL text on BOTH pages. 
+The document may be in any language (Arabic, Latin, Chinese, etc.) and may be handwritten or printed. 
+Transcribe the text EXACTLY as it appears, in its original script/language.
+
+For each line of text, you MUST provide the bounding box and the transcribed text in this EXACT format:
+[ymin, xmin, ymax, xmax] transcribed_text
+
+Coordinates must be integers between 0 and 1000 relative to the image size.
+Output ONLY the transcribed lines in the specified format.
+
+Example Output:
+[120, 250, 160, 750] This is a line of text in English.
+[180, 260, 220, 740] هذه جملة باللغة العربية.
+[240, 270, 280, 730] 这是一行中文文本。`;
       
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
@@ -522,10 +542,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         if (!line) continue;
         const match = line.match(pattern);
         if (match) {
-          const y1 = parseInt(match[1], 10);
-          const x1 = parseInt(match[2], 10);
-          const y2 = parseInt(match[3], 10);
-          const x2 = parseInt(match[4], 10);
+          // Swapping indices to test X/Y swap as requested: 
+          // index 1 becomes x, index 2 becomes y, etc.
+          const x1 = parseInt(match[1], 10);
+          const y1 = parseInt(match[2], 10);
+          const x2 = parseInt(match[3], 10);
+          const y2 = parseInt(match[4], 10);
           const text = match[5].trim();
           
           const px1 = (x1 / 1000.0) * originalWidth;
@@ -826,91 +848,35 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
           font-size: 0.85rem;
           color: #a0aec0;
         }
-        .goto-form {
-          display: inline-flex;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-          border: 1px solid #4a5568;
-          height: 32px;
-        }
-        .goto-text {
-          display: inline-flex;
+        .page-counter-form {
+          display: flex;
           align-items: center;
-          justify-content: center;
-          background: rgba(30, 41, 59, 0.8);
-          color: #e2e8f0;
-          border-right: 1px solid #4a5568;
-          padding: 0 10px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          user-select: none;
+          gap: 6px;
+          padding: 0 4px;
         }
-        .goto-input {
+        .page-input {
           width: 44px;
-          background: rgba(15, 23, 42, 0.8);
-          border: none;
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid rgba(74, 85, 104, 0.8);
+          border-radius: 4px;
           color: #f8fafc;
           text-align: center;
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           font-weight: 700;
           outline: none;
-          padding: 0;
-        }
-        .goto-input:focus {
-          background: rgba(30, 41, 59, 0.9);
-        }
-
-        /* Pagination Button Group */
-        .pagination-group {
-          display: inline-flex;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-          border: 1px solid #4a5568;
-        }
-        .pagination-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(30, 41, 59, 0.8);
-          color: #e2e8f0;
-          border: none;
-          border-right: 1px solid #4a5568;
-          width: 32px;
-          height: 32px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          cursor: pointer;
+          padding: 2px 0;
           transition: all 0.2s;
-          outline: none;
         }
-        .pagination-btn:last-child {
-          border-right: none;
+        .page-input:focus {
+          background: rgba(30, 41, 59, 0.9);
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
-        .pagination-btn:hover:not(:disabled):not(.active) {
-          background: #334155;
-          color: #3b82f6;
-        }
-        .pagination-btn.active {
-          background: #3b82f6;
-          color: #ffffff;
-        }
-        .pagination-btn:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-        .pagination-ellipsis {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(30, 41, 59, 0.8);
+        .page-total {
           color: #94a3b8;
-          border-right: 1px solid #4a5568;
-          width: 32px;
-          height: 32px;
-          font-size: 0.75rem;
-          user-select: none;
+          font-size: 0.85rem;
+          font-weight: 600;
+          white-space: nowrap;
         }
 
         .thumbnails-row {
@@ -1060,89 +1026,34 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
                   Library Folios
                 </h3>
                 <div className="page-nav-container">
-                  <div className="pagination-group" role="group">
-                    <button 
-                      type="button" 
-                      className="pagination-btn" 
-                      onClick={() => setSelectedPageIndex(prev => Math.max(0, prev - 1))}
-                      disabled={selectedPageIndex === 0}
-                      title="Previous Page"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-
-                    {(() => {
-                      const total = tileSources.length;
-                      const current = selectedPageIndex + 1;
-                      const pages = new Set<number>();
-                      
-                      // Strategy: Show 1,2,3... current-2, current-1, current, current+1, current+2 ... total-2, total-1, total
-                      
-                      // Start
-                      for (let i = 1; i <= Math.min(3, total); i++) pages.add(i);
-                      
-                      // Middle
-                      for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) pages.add(i);
-                      
-                      // End
-                      for (let i = Math.max(1, total - 2); i <= total; i++) pages.add(i);
-                      
-                      const sortedPages = Array.from(pages).sort((a, b) => a - b);
-                      const items: (number | string)[] = [];
-                      
-                      for (let i = 0; i < sortedPages.length; i++) {
-                        if (i > 0 && sortedPages[i] - sortedPages[i-1] > 1) {
-                          items.push('...');
-                        }
-                        items.push(sortedPages[i]);
-                      }
-                      
-                      return items.map((p, i) => (
-                        p === '...' ? (
-                          <span key={`ell-${i}`} className="pagination-ellipsis">...</span>
-                        ) : (
-                          <button
-                            key={p}
-                            type="button"
-                            className={`pagination-btn ${current === p ? 'active' : ''}`}
-                            onClick={() => setSelectedPageIndex((p as number) - 1)}
-                          >
-                            {p}
-                          </button>
-                        )
-                      ));
-                    })()}
-
-                    <button 
-                      type="button" 
-                      className="pagination-btn" 
-                      onClick={() => setSelectedPageIndex(prev => Math.min(tileSources.length - 1, prev + 1))}
-                      disabled={selectedPageIndex === tileSources.length - 1}
-                      title="Next Page"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                  </div>
-
                   <form 
-                    className="goto-form" 
+                    className="page-counter-form" 
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const p = parseInt(jumpPage);
+                      const p = parseInt(pageInput);
                       if (!isNaN(p) && p >= 1 && p <= tileSources.length) {
                         setSelectedPageIndex(p - 1);
-                        setJumpPage('');
+                      } else {
+                        setPageInput((selectedPageIndex + 1).toString());
                       }
                     }}
                   >
-                    <span className="goto-text">Go to</span>
                     <input 
                       type="text" 
-                      className="goto-input" 
-                      value={jumpPage}
-                      onChange={(e) => setJumpPage(e.target.value.replace(/[^0-9]/g, ''))}
+                      className="page-input" 
+                      value={pageInput}
+                      onChange={(e) => setPageInput(e.target.value.replace(/[^0-9]/g, ''))}
+                      onBlur={() => {
+                        const p = parseInt(pageInput);
+                        if (isNaN(p) || p < 1 || p > tileSources.length) {
+                          setPageInput((selectedPageIndex + 1).toString());
+                        } else {
+                          setSelectedPageIndex(p - 1);
+                        }
+                      }}
                       aria-label="Go to page"
                     />
+                    <span className="page-total"> / {tileSources.length} pages</span>
                   </form>
                 </div>              </div>
               <div className="thumbnails-row custom-scrollbar" ref={thumbnailsRowRef}>

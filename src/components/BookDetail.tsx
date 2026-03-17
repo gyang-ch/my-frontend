@@ -220,21 +220,12 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
                   <strong>Year:</strong> {book.year}
                 </div>
                 <div className="meta-item">
-                  <strong>Dynasty:</strong> {book.dynasty}
-                </div>
-                <div className="meta-item">
                   <strong>Language:</strong> {book.language[0]}
                 </div>
                 <div className="meta-item">
                   <strong>Images:</strong> {book.pageCount}
                 </div>
-                {book.illustrationCount && (
-                  <div className="meta-item">
-                    <strong>Illus:</strong> {book.illustrationCount}
-                  </div>
-                )}
               </div>
-
               <div className="book-subjects">
                 {book.subjects.slice(0, 3).map((s) => (
                   <span key={s} className="subject-tag">{s}</span>
@@ -246,25 +237,27 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
                 <div className="book-footer">
                 <p className="attribution-text">{book.attribution}</p>
                 <div className="footer-actions">
-                  {studioPathForBook && (
-                    <Link
-                      to={studioPathForBook(book)}
-                      className="manifest-link"
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label={`Open Analysis Studio for ${book.title}`}
-                    >
-                      Studio
-                    </Link>
-                  )}
                   <a 
                     href={getMuseumUrl(book)} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="manifest-link"
+                    className="source-link"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Source
                   </a>
+                  {onSelectBook && (
+                    <button
+                      type="button"
+                      className="explore-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectBook(book);
+                      }}
+                    >
+                      Explore book
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

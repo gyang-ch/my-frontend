@@ -259,7 +259,6 @@ export function LibraryPage() {
           studioPathForBook={(b) => `/studio/${b.id}`}
           onSelectBook={(book) => {
             navigate(`/studio/${book.id}`)
-            window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
           }}
         />
       </section>

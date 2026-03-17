@@ -64,7 +64,7 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
         navigatorDisplayRegionColor: '#38bdf8', // Blue-ish color instead of red
         sequenceMode: true,
         showReferenceStrip: false,
-        preserveViewport: true,
+        preserveViewport: false,
         visibilityRatio: 1.0,
         constrainDuringPan: true,
         defaultZoomLevel: 0,
@@ -75,6 +75,8 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
 
       viewer.addHandler('page', (event: any) => {
         if (onPageChange) onPageChange(event.page);
+        // Reset zoom to 100% (home) on page change
+        viewer.viewport.goHome(true);
       });
 
       viewer.addHandler('open', () => {

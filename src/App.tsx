@@ -14,8 +14,9 @@ const prefersReducedMotion = () =>
   window.matchMedia &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+export const scrollToContent = (heroRef: React.RefObject<HTMLElement>) => {
+  const top = heroRef.current?.offsetHeight || 0;
+  window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }
 
 const navItems = [
@@ -40,6 +41,13 @@ function App() {
     () => pathname.startsWith('/storyline') || pathname.startsWith('/geography'),
     [pathname],
   )
+
+  // Scroll to content on path change
+  useEffect(() => {
+    // Only scroll if we are not at the very top (optional logic, but usually good)
+    // Actually user said "whenever i click another tab", so we do it.
+    scrollToContent(heroSectionRef);
+  }, [pathname]);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
@@ -100,7 +108,6 @@ function App() {
             type="button"
             onClick={() => {
               navigate('/home')
-              scrollToTop()
             }}
             aria-label="Go to home"
           >
@@ -118,7 +125,6 @@ function App() {
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => scrollToTop()}
               >
                 {item.label}
               </NavLink>
