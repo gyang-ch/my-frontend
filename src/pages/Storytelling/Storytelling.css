@@ -2,7 +2,7 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-color: #f4ecd8;
+  background-color: #FFFFFF;
   color: #f4f4f4;
   overflow: hidden; /* Important: this prevents the whole page from scrolling */
 }
@@ -15,7 +15,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: #f4ecd8;
+  background: #FFFFFF;
   pointer-events: none; /* Disables all manual map interaction */
 }
 

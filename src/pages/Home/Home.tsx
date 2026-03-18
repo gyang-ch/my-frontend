@@ -4,12 +4,12 @@ const cards = [
   {
     to: '/library',
     title: 'Library',
-    body: 'Browse manuscripts and filter by time and language. Enter the Studio from any item.',
+    body: 'Browse manuscripts and filter by time and language. Enter the AI Hub from any item.',
     meta: 'Catalogue + filters',
   },
   {
-    to: '/studio',
-    title: 'Analysis Studio',
+    to: '/ai-hub',
+    title: 'AI Hub',
     body: 'A close-reading space for a selected manuscript: zoom, inspect, and interpret.',
     meta: 'IIIF reader',
   },
@@ -49,4 +49,3 @@ export function HomePage() {
     </section>
   )
 }
-

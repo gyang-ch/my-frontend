@@ -9,7 +9,7 @@ interface BookDetailProps {
   books: BookRecord[];
   period: string;
   onSelectBook?: (book: BookRecord) => void;
-  studioPathForBook?: (book: BookRecord) => string;
+  aiHubPathForBook?: (book: BookRecord) => string;
 }
 
 const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
@@ -62,16 +62,6 @@ const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = (
   );
 };
 
-const getMuseumUrl = (book: BookRecord) => {
-  const inst = book.institution?.toLowerCase() || '';
-  if (inst.includes('library of congress')) return `https://www.loc.gov/item/${book.id}/`;
-  if (inst.includes('bodleian')) return `https://digital.bodleian.ox.ac.uk/objects/${book.id}/`;
-  if (inst.includes('national diet library')) return `https://dl.ndl.go.jp/pid/${book.id}`;
-  if (inst.includes('yale')) return `https://collections.library.yale.edu/catalog/${book.id}`;
-  if (inst.includes('japanese literature')) return `https://kokusho.nijl.ac.jp/biblio/${book.id}/`;
-  if (inst.includes('harvard')) return `https://hollis.harvard.edu/primo-explore/search?query=any,contains,${book.id}&vid=HVD2`;
-  return book.manifestUrl; // fallback
-};
 
 export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
   const [visibleCount, setVisibleCount] = useState(6);
@@ -189,7 +179,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
             }}
             role={onSelectBook ? 'button' : undefined}
             tabIndex={onSelectBook ? 0 : -1}
-            aria-label={onSelectBook ? `Open Analysis Studio for ${book.title}` : undefined}
+            aria-label={onSelectBook ? `Open AI Hub for ${book.title}` : undefined}
           >
             <div className="book-image-container">
               <SmartImage src={book.thumbnailUrl} alt={book.title} className="book-thumbnail" />
@@ -236,9 +226,9 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
                 <div className="book-footer">
                 <p className="attribution-text">{book.attribution}</p>
                 <div className="footer-actions">
-                  <a 
-                    href={getMuseumUrl(book)} 
-                    target="_blank" 
+                  <a
+                    href={book.museumUrl || book.manifestUrl}
+                    target="_blank"
                     rel="noopener noreferrer" 
                     className="source-link"
                     onClick={(e) => e.stopPropagation()}

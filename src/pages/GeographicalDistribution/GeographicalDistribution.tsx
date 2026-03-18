@@ -59,7 +59,7 @@ export const GeographicalDistribution: React.FC = () => {
     .domain([0, maxWeight]);
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f4ecd8', padding: '6rem 2rem 4rem', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#FFFFFF', padding: '6rem 2rem 4rem', boxSizing: 'border-box' }}>
       <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', gap: '4rem' }}>
         
         {/* Kepler.gl Map Section */}

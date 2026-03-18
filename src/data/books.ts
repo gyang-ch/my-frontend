@@ -10,10 +10,10 @@ export interface BookRecord {
   subjects: string[];
   category: "botany" | "mathematics" | "astronomy"; // Unified top-level category for filtering
   manifestUrl: string;
+  museumUrl?: string;         // Direct museum/library catalogue URL
   thumbnailUrl: string;
   pageCount: number;
 
-  // New Global Research Fields
   institution: string;        // e.g., "Bodleian Libraries"
   attribution: string;        // e.g., "Photo: © Bodleian Libraries..."
   license?: string;           // e.g., "CC BY-NC 4.0"
@@ -21,11 +21,9 @@ export interface BookRecord {
   authors: string[];          // e.g., ["Dioscorides Pedanius"]
   shelfmark: string;          // e.g., "Bodleian Library MS. Arab. d. 138"
   
-  // High-Level AI helper
   hasIllustrations: boolean;  // Based on "Decoration" metadata
   illustrationCount?: number; // e.g., 289 (from Bodleian's metadata)
 
-  // Technical
   logoUrl?: string;           // Museum logo
 }
 
@@ -43,7 +41,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Astronomy", "Calendar", "Qing Dynasty", "Jesuit Missions"],
     category: "astronomy",
     manifestUrl: "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k98181886/manifest.json",
+    museumUrl: "https://gallica.bnf.fr/ark:/12148/bpt6k98181886",
     thumbnailUrl: "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k98181886/f30/full/300,/0/default.jpg",
+    logoUrl: "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     pageCount: 552,
     institution: "Bibliothèque nationale de France",
     attribution: "Bibliothèque nationale de France",
@@ -51,7 +51,6 @@ export const bookData: BookRecord[] = [
     authors: ["Ferdinand Verbiest"],
     shelfmark: "CHINOIS-5005",
     hasIllustrations: true,
-    logoUrl: "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     id: "53988940",
@@ -63,7 +62,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Astronomy", "Scientific Instruments", "Observatory", "Qing Dynasty"],
     category: "astronomy",
     manifestUrl: "https://iiif.lib.harvard.edu/manifests/drs:53988940",
+    museumUrl: "https://hollis.harvard.edu/primo-explore/search?query=any,contains,53988940&vid=HVD2",
     thumbnailUrl: "https://ids.lib.harvard.edu/ids/iiif/53990254/full/300,/0/default.jpg",
+    logoUrl: "https://iiif.lib.harvard.edu/static/manifests/harvard_logo.jpg",
     pageCount: 835,
     institution: "Harvard University",
     attribution: "Harvard University Library",
@@ -71,7 +72,6 @@ export const bookData: BookRecord[] = [
     authors: ["Ferdinand Verbiest"],
     shelfmark: "53988940",
     hasIllustrations: true,
-    logoUrl: "https://iiif.lib.harvard.edu/static/manifests/harvard_logo.jpg"
   },
   {
     id: "2014514195",
@@ -83,7 +83,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Botany", "Medicinal plants", "Chinese medicine"],
     category: "botany",
     manifestUrl: "https://www.loc.gov/item/2014514195/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2014514195/",
     thumbnailUrl: "https://tile.loc.gov/image-services/iiif/service:asian:lcnclscd:2014514195:1A000:29b30a/full/300,/0/default.jpg",
+    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg",
     pageCount: 61,
     institution: "Library of Congress",
     attribution: "Provided by the Library of Congress",
@@ -92,7 +94,6 @@ export const bookData: BookRecord[] = [
     shelfmark: "2014514195",
     hasIllustrations: true,
     illustrationCount: 42,
-    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     id: "2006433487",
@@ -104,7 +105,9 @@ export const bookData: BookRecord[] = [
     subjects: ["plant breeding", "china", "flowers", "floriculture"],
     category: "botany",
     manifestUrl: "https://www.loc.gov/item/2006433487/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2006433487/",
     thumbnailUrl: "https://tile.loc.gov/image-services/iiif/service:asian:lcnclscd:2006433487:1A000:28b29a/full/300,/0/default.jpg",
+    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg",
     pageCount: 36,
     institution: "Library of Congress",
     attribution: "Provided by the Library of Congress",
@@ -113,7 +116,6 @@ export const bookData: BookRecord[] = [
     shelfmark: "2006433487",
     hasIllustrations: true,
     illustrationCount: 42,
-    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     id: "2021666851",
@@ -125,7 +127,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Pharmacology", "Botany", "Medicinal plants", "Translation"],
     category: "botany",
     manifestUrl: "https://www.loc.gov/item/2021666851/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021666851/",
     thumbnailUrl: "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:10:63:2:wdl_10632:R_008514-000030_Pg.0015/full/300,/0/default.jpg",
+    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg",
     pageCount: 663,
     institution: "Library of Congress",
     attribution: "Provided by the Library of Congress",
@@ -134,7 +138,6 @@ export const bookData: BookRecord[] = [
     shelfmark: "2021666851",
     hasIllustrations: true,
     illustrationCount: 600,
-    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     id: "2021667445",
@@ -146,7 +149,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Materia medica", "Chinese medicine", "Medicinal plants"],
     category: "botany",
     manifestUrl: "https://www.loc.gov/item/2021667445/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021667445/",
     thumbnailUrl: "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:13:51:3:wdl_13513:016a/full/300,/0/default.jpg",
+    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg",
     pageCount: 104,
     institution: "Library of Congress",
     attribution: "Provided by the Library of Congress",
@@ -155,7 +160,6 @@ export const bookData: BookRecord[] = [
     shelfmark: "2021667445",
     hasIllustrations: true,
     illustrationCount: 1367,
-    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     id: "2021666395",
@@ -167,7 +171,9 @@ export const bookData: BookRecord[] = [
     subjects: ["Materia medica", "Herbal medicine", "Song dynasty", "Medical literature"],
     category: "botany",
     manifestUrl: "https://www.loc.gov/item/2021666395/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021666395/",
     thumbnailUrl: "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:11:41:5_:00:1:wdl_11415_001:00030/full/300,/0/default.jpg",
+    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg",
     pageCount: 50,
     institution: "Library of Congress",
     attribution: "Provided by the Library of Congress",
@@ -175,7 +181,6 @@ export const bookData: BookRecord[] = [
     authors: ["Tang Shenwei"],
     shelfmark: "2021666395",
     hasIllustrations: true,
-    logoUrl: "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     id: "4f104fd5-16b5-4cd6-99b3-9a8f8868d7ff",
@@ -187,6 +192,7 @@ export const bookData: BookRecord[] = [
     subjects: ["Medicinal plants", "Pharmacology", "Islamic medicine"],
     category: "botany",
     manifestUrl: "https://iiif.bodleian.ox.ac.uk/iiif/manifest/4f104fd5-16b5-4cd6-99b3-9a8f8868d7ff.json",
+    museumUrl: "https://digital.bodleian.ox.ac.uk/objects/4f104fd5-16b5-4cd6-99b3-9a8f8868d7ff/",
     thumbnailUrl: "https://iiif.bodleian.ox.ac.uk/iiif/image/697107dd-36b8-4fad-bd97-64932d7f59ef/full/300,/0/default.jpg",
     pageCount: 434,
     institution: "Bodleian Libraries",
@@ -208,6 +214,7 @@ export const bookData: BookRecord[] = [
     subjects: ["Medicinal plants", "18th century", "Botanical illustration"],
     category: "botany",
     manifestUrl: "https://oa-rhs.libnova.com/iiif/manifest/52114",
+    museumUrl: "https://oa-rhs.libnova.com/view/52114",
     thumbnailUrl: "https://oa-rhs.libnova.com/iiif/2/1036209/full/300,/0/default.jpg",
     pageCount: 659,
     institution: "RHS Lindley Collections",
@@ -229,6 +236,7 @@ export const bookData: BookRecord[] = [
     subjects: ["Cipher", "Botanical drawings", "Alchemy"],
     category: "botany",
     manifestUrl: "https://collections.library.yale.edu/manifests/2002046",
+    museumUrl: "https://collections.library.yale.edu/catalog/2002046",
     thumbnailUrl: "https://collections.library.yale.edu/iiif/2/1006103/full/300,/0/default.jpg",
     pageCount: 240,
     institution: "Yale University Library",
@@ -249,6 +257,7 @@ export const bookData: BookRecord[] = [
     subjects: ["Botany", "Japanese literature", "Botanical illustration"],
     category: "botany",
     manifestUrl: "https://kokusho.nijl.ac.jp/biblio/100452358/manifest",
+    museumUrl: "https://kokusho.nijl.ac.jp/biblio/100452358/",
     thumbnailUrl: "https://kokusho.nijl.ac.jp/api/iiif/100452358/v4/TOKY/TOKY-02609/TOKY-02609-00029.tif/full/300,/0/default.jpg",
     pageCount: 150,
     institution: "National Institute of Japanese Literature",
@@ -273,7 +282,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575428/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575428",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575428/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 47,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -286,7 +297,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575429",
@@ -302,7 +312,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575429/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575429",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575429/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 58,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -315,7 +327,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575427",
@@ -331,7 +342,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575427/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575427",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575427/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 39,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -344,7 +357,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575430",
@@ -360,7 +372,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575430/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575430",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575430/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 35,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -373,7 +387,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575431",
@@ -389,7 +402,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575431/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575431",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575431/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 49,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -402,7 +417,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575432",
@@ -418,7 +432,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575432/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575432",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575432/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 38,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -431,7 +447,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575433",
@@ -447,7 +462,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575433/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575433",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575433/R0000020/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 28,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -460,7 +477,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575434",
@@ -476,7 +492,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575434/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575434",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575434/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 37,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -489,7 +507,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575435",
@@ -505,7 +522,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575435/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575435",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575435/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 49,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -518,7 +537,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575436",
@@ -534,7 +552,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575436/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575436",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575436/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 49,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -547,7 +567,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575437",
@@ -563,7 +582,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575437/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575437",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575437/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 47,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -576,7 +597,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575438",
@@ -592,7 +612,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575438/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575438",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575438/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 40,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -605,7 +627,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "寄別10-56",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2558704",
@@ -621,7 +642,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2558704/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2558704",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2558704/R0000020/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 29,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -634,7 +657,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特7-495",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555682",
@@ -650,7 +672,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555682/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555682",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555682/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 57,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -663,7 +687,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555683",
@@ -679,7 +702,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555683/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555683",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555683/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 69,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -692,7 +717,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555684",
@@ -708,7 +732,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555684/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555684",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555684/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 66,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -721,7 +747,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555685",
@@ -737,7 +762,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555685/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555685",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555685/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 57,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -750,7 +777,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555686",
@@ -766,7 +792,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555686/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555686",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555686/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 71,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -779,7 +807,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555687",
@@ -795,7 +822,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555687/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555687",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555687/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 61,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -808,7 +837,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2555688",
@@ -824,7 +852,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2555688/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2555688",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2555688/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 74,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -837,7 +867,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-372",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575872",
@@ -853,7 +882,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575872/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575872",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575872/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 54,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -866,7 +897,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-2298",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575873",
@@ -882,7 +912,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575873/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575873",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575873/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 58,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -895,7 +927,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-2298",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "2575874",
@@ -911,7 +942,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://dl.ndl.go.jp/api/iiif/2575874/manifest.json",
+    museumUrl: "https://dl.ndl.go.jp/pid/2575874",
     "thumbnailUrl": "https://dl.ndl.go.jp/api/iiif/2575874/R0000030/full/300,/0/default.jpg",
+    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png",
     "pageCount": 59,
     "institution": "National Diet Library",
     "attribution": "国立国会図書館 National Diet Library, JAPAN",
@@ -924,7 +957,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "特1-2298",
     "hasIllustrations": true,
-    "logoUrl": "https://dl.ndl.go.jp/img/logo/ndldc/iiif-logo.png"
   },
   {
     "id": "cc1c2e51-8daf-49e9-b164-618d563d15d5",
@@ -940,6 +972,7 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://iiif.bodleian.ox.ac.uk/iiif/manifest/cc1c2e51-8daf-49e9-b164-618d563d15d5.json",
+    museumUrl: "https://digital.bodleian.ox.ac.uk/objects/cc1c2e51-8daf-49e9-b164-618d563d15d5/",
     "thumbnailUrl": "https://iiif.bodleian.ox.ac.uk/iiif/image/cd7963e7-09b2-49ad-bb8a-a8e6db981c3c/full/300,/0/default.jpg",
     "pageCount": 197,
     "institution": "Bodleian Libraries",
@@ -967,7 +1000,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://www.loc.gov/item/50049695/manifest.json",
+    museumUrl: "https://www.loc.gov/item/50049695/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:rbc:rbctos:2018rosen1892v1:0030/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 402,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -979,7 +1014,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "50049695",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "05036274",
@@ -996,6 +1030,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("a1.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/public:gdcmassbookdig:elementarybotan00atki:elementarybotan00atki_0030/full/pct:100.0/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 554,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1007,7 +1042,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "QK41 .A87 1905",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "bpt6k10402533",
@@ -1023,7 +1057,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k10402533/manifest.json",
+    museumUrl: "https://gallica.bnf.fr/ark:/12148/bpt6k10402533",
     "thumbnailUrl": "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k10402533/f30/full/300,/0/default.jpg",
+    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     "pageCount": 515,
     "institution": "Bibliothèque nationale de France",
     "attribution": "Bibliothèque nationale de France",
@@ -1036,7 +1072,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Bibliothèque nationale de France, département Arsenal, FOL-S-655 (1)",
     "hasIllustrations": true,
-    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     "id": "bpt6k3414705j",
@@ -1052,7 +1087,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "botany",
     "manifestUrl": "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k3414705j/manifest.json",
+    museumUrl: "https://gallica.bnf.fr/ark:/12148/bpt6k3414705j",
     "thumbnailUrl": "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k3414705j/f30/full/300,/0/default.jpg",
+    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     "pageCount": 340,
     "institution": "Bibliothèque nationale de France",
     "attribution": "Bibliothèque nationale de France",
@@ -1065,7 +1102,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Bibliothèque nationale de France, département Sciences et techniques, 2015-272836",
     "hasIllustrations": true,
-    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     "id": "2021667076",
@@ -1088,7 +1124,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "mathematics",
     "manifestUrl": "https://www.loc.gov/item/2021667076/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021667076/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:18:19:8:wdl_18198:bsb00037426_00030/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 284,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1101,7 +1139,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667076",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021666487",
@@ -1121,7 +1158,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "mathematics",
     "manifestUrl": "https://www.loc.gov/item/2021666487/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021666487/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:17:21:6_:00:1:wdl_17216_001:030/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 69,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1136,7 +1175,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021666487",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021666337",
@@ -1154,7 +1192,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "mathematics",
     "manifestUrl": "https://www.loc.gov/item/2021666337/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021666337/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:07:10:3_:00:1:wdl_07103_001:00001/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 14,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1168,7 +1208,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021666337",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667242",
@@ -1186,7 +1225,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "mathematics",
     "manifestUrl": "https://www.loc.gov/item/2021667242/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021667242/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:09:54:6:wdl_09546:8340030/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 36,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1198,7 +1239,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667242",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667539",
@@ -1219,7 +1259,9 @@ export const bookData: BookRecord[] = [
     ],
     "category": "mathematics",
     "manifestUrl": "https://www.loc.gov/item/2021667539/manifest.json",
+    museumUrl: "https://www.loc.gov/item/2021667539/",
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:19:52:4:wdl_19524:bsb00095507_00030/full/300,/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 571,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1233,7 +1275,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667539",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021666122",
@@ -1253,6 +1294,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b1.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:02:94:0:wdl_02940:084-006/full/pct:25/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 26,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1265,7 +1307,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021666122",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667416",
@@ -1286,6 +1327,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b2.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:03:02:5:wdl_03025:022/full/pct:12.5/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 37,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1298,7 +1340,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667416",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667602",
@@ -1329,6 +1370,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b3.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:03:04:0:wdl_03040:0045/full/pct:12.5/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 225,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1340,7 +1382,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667602",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667659",
@@ -1361,6 +1402,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b4.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:04:10:6_:00:1:wdl_04106_001:bsb00021200_00029/full/pct:6.25/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 83,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1372,7 +1414,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667659",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667788",
@@ -1394,6 +1435,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b5.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:08:96:5:wdl_08965:bsb00040571_00007/full/pct:6.25/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 60,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1405,7 +1447,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667788",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667837",
@@ -1432,6 +1473,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b6.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:10:09:6_:00:1:wdl_10096_001:MedPalat218_01_0034/full/pct:6.25/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 729,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1444,7 +1486,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667837",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667232",
@@ -1467,6 +1508,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b7.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:09:20:7:wdl_09207:W640_000006_300/full/pct:12.5/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 625,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1479,7 +1521,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667232",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021667882",
@@ -1504,6 +1545,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b8.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:11:56:0:wdl_11560:ms459c_033v/full/pct:12.5/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 593,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1517,7 +1559,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021667882",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "2021666418",
@@ -1539,6 +1580,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("b9.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:11:83:2:wdl_11832:1288345_R0000007/full/pct:12.5/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 22,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1550,7 +1592,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021666418",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "131EAA3A",
@@ -1566,6 +1607,7 @@ export const bookData: BookRecord[] = [
     "category": "astronomy",
     "manifestUrl": publicManifestUrl("astronomy_3.json"),
     "thumbnailUrl": "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHe3msaH/full/max/0/default.jpg",
+    "logoUrl": "https://api.onb.ac.at/logo.png",
     "pageCount": 17,
     "institution": "Austrian National Library",
     "attribution": "Austrian National Library",
@@ -1578,7 +1620,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "K I 97080 KAR MAG",
     "hasIllustrations": true,
-    "logoUrl": "https://api.onb.ac.at/logo.png"
   },
   {
     "id": "2021670764",
@@ -1597,6 +1638,7 @@ export const bookData: BookRecord[] = [
     "category": "astronomy",
     "manifestUrl": publicManifestUrl("astronomy_4.json"),
     "thumbnailUrl": "https://tile.loc.gov/image-services/iiif/service:gdc:gdcwdl:wd:l_:15:13:1:wdl_15131:00000028/full/pct:3.125/0/default.jpg",
+    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg",
     "pageCount": 96,
     "institution": "Library of Congress",
     "attribution": "Provided by the Library of Congress",
@@ -1609,7 +1651,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "2021670764",
     "hasIllustrations": true,
-    "logoUrl": "https://loc.gov/static/images/logo-loc-new-branding.svg"
   },
   {
     "id": "btv1b525002505",
@@ -1622,6 +1663,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("c1.json"),
     "thumbnailUrl": "https://gallica.bnf.fr/ark:/12148/btv1b525002505.thumbnail",
+    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     "pageCount": 358,
     "institution": "Bibliothèque nationale de France",
     "attribution": "Bibliothèque nationale de France",
@@ -1634,7 +1676,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Bibliothèque nationale de France. Département des Manuscrits. Grec 2179",
     "hasIllustrations": true,
-    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     "id": "3641757",
@@ -1649,6 +1690,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": "https://digitalcollections.universiteitleiden.nl/iiif_manifest/item:3641757/manifest",
     "thumbnailUrl": "https://iiifviewer.universiteitleiden.nl/logo/",
+    "logoUrl": "https://iiifviewer.universiteitleiden.nl/logo/",
     "pageCount": 697,
     "institution": "Leiden University Libraries",
     "attribution": "Full access. The rights status of this resource is public domain",
@@ -1664,7 +1706,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Or. 289",
     "hasIllustrations": true,
-    "logoUrl": "https://iiifviewer.universiteitleiden.nl/logo/"
   },
   {
     "id": "btv1b84262821",
@@ -1677,6 +1718,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("c3.json"),
     "thumbnailUrl": "https://gallica.bnf.fr/ark:/12148/btv1b84262821.thumbnail",
+    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     "pageCount": 146,
     "institution": "Bibliothèque nationale de France",
     "attribution": "Bibliothèque nationale de France",
@@ -1692,7 +1734,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Bibliothèque nationale de France. Département des Manuscrits. Latin 6862",
     "hasIllustrations": true,
-    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     "id": "btv1b52505781g",
@@ -1705,6 +1746,7 @@ export const bookData: BookRecord[] = [
     "category": "mathematics",
     "manifestUrl": publicManifestUrl("c4.json"),
     "thumbnailUrl": "https://gallica.bnf.fr/ark:/12148/btv1b52505781g.thumbnail",
+    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png",
     "pageCount": 417,
     "institution": "Bibliothèque nationale de France",
     "attribution": "Bibliothèque nationale de France",
@@ -1717,7 +1759,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Bibliothèque nationale de France. Département des Manuscrits. Chinois 5563",
     "hasIllustrations": true,
-    "logoUrl": "https://gallica.bnf.fr/mbImage/logos/logo-bnf.png"
   },
   {
     "id": "Chig.F.VII.159",
@@ -1730,6 +1771,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("c5.json"),
     "thumbnailUrl": "https://digi.vatlib.it/pub/digit/MSS_Chig.F.VII.159/cover/cover.jpg",
+    "logoUrl": "https://digi.vatlib.it/resource/img/i/DVL_logo.jpg",
     "pageCount": 511,
     "institution": "Biblioteca Apostolica Vaticana",
     "attribution": "Images Copyright Biblioteca Apostolica Vaticana",
@@ -1741,7 +1783,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Chig.F.VII.159",
     "hasIllustrations": true,
-    "logoUrl": "https://digi.vatlib.it/resource/img/i/DVL_logo.jpg"
   },
   {
     "id": "Vat.gr.284",
@@ -1754,6 +1795,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("c6.json"),
     "thumbnailUrl": "https://digi.vatlib.it/pub/digit/MSS_Vat.gr.284/cover/cover.jpg",
+    "logoUrl": "https://digi.vatlib.it/resource/img/i/DVL_logo.jpg",
     "pageCount": 598,
     "institution": "Biblioteca Apostolica Vaticana",
     "attribution": "Images Copyright Biblioteca Apostolica Vaticana",
@@ -1765,7 +1807,6 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Vat.gr.284",
     "hasIllustrations": true,
-    "logoUrl": "https://digi.vatlib.it/resource/img/i/DVL_logo.jpg"
   },
   {
     "id": "Sel.2.81",
@@ -1782,6 +1823,7 @@ export const bookData: BookRecord[] = [
     "category": "botany",
     "manifestUrl": publicManifestUrl("c7.json"),
     "thumbnailUrl": "https://images.lib.cam.ac.uk/iiif/PR-SEL-00002-00081-000-00001.jp2/full/300,/0/default.jpg",
+    "logoUrl": "https://cudl.lib.cam.ac.uk/themeui/theme/images/logo.svg",
     "pageCount": 939,
     "institution": "Cambridge University Library",
     "attribution": "Provided by Cambridge University Library. Cambridge University Library Images made available for download are licensed under a Creative Commons Attribution-NonCommercial 4.0 Unported License (CC-BY-NC 3.0) This metadata is licensed under a Creative Commons Attribution-NonCommercial 4.0 Unported License.",
@@ -1795,6 +1837,5 @@ export const bookData: BookRecord[] = [
     ],
     "shelfmark": "Sel.2.81",
     "hasIllustrations": true,
-    "logoUrl": "https://cudl.lib.cam.ac.uk/themeui/theme/images/logo.svg"
   }
 ];

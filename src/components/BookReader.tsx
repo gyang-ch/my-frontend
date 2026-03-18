@@ -528,7 +528,7 @@ Example Output:
               ]
             }
           ],
-          max_tokens: 32768,
+          max_tokens: 8192,
           stream: true,
           temperature: 0.1
         })
@@ -1053,8 +1053,8 @@ Example Output:
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .osd-btn:hover:not(:disabled) {
-          background: #475569 !important;
-          border-color: #64748b !important;
+          background: #0d9488 !important;
+          border-color: #14b8a6 !important;
           color: #ffffff !important;
         }
         .osd-btn.copy-transcription-btn:hover:not(:disabled) {

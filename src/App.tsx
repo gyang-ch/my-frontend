@@ -5,9 +5,10 @@ import './App.css'
 
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
-import { StudioPage } from './pages/Studio/Studio'
+import { AIHubPage } from './pages/AIHub/AIHub'
 import { Storytelling } from './pages/Storytelling/Storytelling'
 import { GeographicalDistribution } from './pages/GeographicalDistribution/GeographicalDistribution'
+import { IllustrationsPage } from './pages/Illustrations/Illustrations'
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
@@ -22,9 +23,10 @@ export const scrollToContent = (heroRef: React.RefObject<HTMLElement | null>) =>
 const navItems = [
   { to: '/home', label: 'Home', end: true },
   { to: '/library', label: 'Library', end: true },
-  { to: '/studio', label: 'Analysis Studio', end: false },
-  { to: '/storyline', label: 'Storyline', end: true },
+  { to: '/ai-hub', label: 'AI Hub', end: false },
+  { to: '/illustrations', label: 'Illustrations', end: true },
   { to: '/geography', label: 'Geographical Distribution', end: true },
+  { to: '/storyline', label: 'Storyline', end: true },
 ] as const
 
 function App() {
@@ -36,7 +38,7 @@ function App() {
   const tabBarRef = useRef<HTMLDivElement>(null)
 
   const pathname = location.pathname
-  const isReaderMode = useMemo(() => pathname.startsWith('/studio/') && pathname.split('/').length >= 3, [pathname])
+  const isReaderMode = useMemo(() => pathname.startsWith('/ai-hub/') && pathname.split('/').length >= 3, [pathname])
   const isFullWidth = useMemo(
     () => pathname.startsWith('/storyline') || pathname.startsWith('/geography'),
     [pathname],
@@ -141,10 +143,11 @@ function App() {
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/library" element={<LibraryPage />} />
-          <Route path="/studio" element={<StudioPage />} />
-          <Route path="/studio/:bookId" element={<StudioPage />} />
+          <Route path="/ai-hub" element={<AIHubPage />} />
+          <Route path="/ai-hub/:bookId" element={<AIHubPage />} />
           <Route path="/storyline" element={<Storytelling />} />
           <Route path="/geography" element={<GeographicalDistribution />} />
+          <Route path="/illustrations" element={<IllustrationsPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>

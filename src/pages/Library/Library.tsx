@@ -256,9 +256,9 @@ export function LibraryPage() {
         <BookDetail
           books={displayedBooks}
           period={selectedPeriod}
-          studioPathForBook={(b) => `/studio/${b.id}`}
+          aiHubPathForBook={(b) => `/ai-hub/${b.id}`}
           onSelectBook={(book) => {
-            navigate(`/studio/${book.id}`)
+            navigate(`/ai-hub/${book.id}`)
           }}
         />
       </section>
