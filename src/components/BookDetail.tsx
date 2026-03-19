@@ -36,7 +36,7 @@ const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = (
           alignItems: 'center',
           justifyContent: 'center',
           background: '#1e293b',
-          color: '#64748b',
+          color: '#94a3b8',
           fontSize: '0.8rem',
           minHeight: '200px'
         }}

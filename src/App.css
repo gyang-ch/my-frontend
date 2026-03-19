@@ -151,17 +151,22 @@
 }
 
 .site-footer {
-  padding: 4rem 2rem;
+  padding: 1.5rem 2rem;
   text-align: center;
-  color: #718096;
-  border-top: 1px solid #e2e8f0;
-  margin-top: 4rem;
+  border-top: 1px solid #e8e3d9;
+}
+
+.site-footer p {
+  margin: 0;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
 }
 
 @media (prefers-color-scheme: dark) {
   .site-footer {
-    border-top-color: rgba(255, 255, 255, 0.08);
-    color: rgba(226, 232, 240, 0.7);
+    border-top-color: rgba(255, 255, 255, 0.07);
   }
 }
 
@@ -651,14 +656,14 @@
 
 .meta-item {
   font-size: 0.8rem;
-  color: #cbd5e0;
+  color: #e2e8f0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .meta-item strong {
-  color: #718096;
+  color: #cbd5e0;
   text-transform: uppercase;
   font-size: 0.7rem;
   letter-spacing: 0.5px;
@@ -692,7 +697,7 @@
 
 .attribution-text {
   font-size: 0.65rem;
-  color: #718096;
+  color: #cbd5e0;
   margin: 0;
   font-style: italic;
   flex: 1;
@@ -703,7 +708,7 @@
 }
 
 .manifest-link {
-  color: #a0aec0;
+  color: #cbd5e0;
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 500;
@@ -751,7 +756,7 @@
 }
 
 .source-link {
-  color: #a0aec0 !important;
+  color: #cbd5e0 !important;
   text-decoration: underline !important;
   text-underline-offset: 3px;
   font-size: 0.75rem;

@@ -6,17 +6,6 @@
   min-height: 100vh;
 }
 
-/* Ensure all common text elements in white theme are black */
-.white-theme-mode p, 
-.white-theme-mode h1, 
-.white-theme-mode h2, 
-.white-theme-mode h3, 
-.white-theme-mode h4,
-.white-theme-mode span,
-.white-theme-mode div:not(.home-card):not(.home-card *) {
-  color: #000000 !important;
-}
-
 /* Specific component overrides for white theme */
 .white-theme-mode .section-heading,
 .white-theme-mode .illus-heading,
@@ -33,6 +22,11 @@
   font-family: "Aptos", "Segoe UI", sans-serif !important;
 }
 
+.white-theme-mode .home-intro p,
+.white-theme-mode .home-entry-text {
+  color: #1e293b !important;
+}
+
 /* Force white background even in dark mode preferences for these pages */
 @media (prefers-color-scheme: dark) {
   .content.white-theme-mode {
@@ -40,15 +34,6 @@
     color: #000000 !important;
   }
   
-  .white-theme-mode p, 
-  .white-theme-mode h1, 
-  .white-theme-mode h2, 
-  .white-theme-mode h3, 
-  .white-theme-mode h4,
-  .white-theme-mode span,
-  .white-theme-mode div:not(.home-card):not(.home-card *) {
-    color: #000000 !important;
-  }
 }
 
 /* Home Page specific layouts (inherited within white-theme-mode) */
@@ -56,12 +41,12 @@
   background-color: transparent !important;
   color: inherit !important;
   font-family: inherit !important;
-  padding-top: 4rem;
-  padding-bottom: 8rem;
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
 }
 
 .home-intro {
-  margin-bottom: 6rem;
+  margin-bottom: 3rem;
   max-width: 850px;
   margin-left: auto;
   margin-right: auto;
@@ -79,7 +64,7 @@
 .home-entries {
   display: flex;
   flex-direction: column;
-  gap: 7rem;
+  gap: 3.5rem;
   max-width: 1000px;
   margin: 0 auto;
 }
