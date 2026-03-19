@@ -6,7 +6,6 @@ import './App.css'
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
 import { AIHubPage } from './pages/AIHub/AIHub'
-import { Storytelling } from './pages/Storytelling/Storytelling'
 import { GeographicalDistribution } from './pages/GeographicalDistribution/GeographicalDistribution'
 import { IllustrationsPage } from './pages/Illustrations/Illustrations'
 
@@ -26,7 +25,6 @@ const navItems = [
   { to: '/ai-hub', label: 'AI Hub', end: false },
   { to: '/illustrations', label: 'Illustrations', end: true },
   { to: '/geography', label: 'Geographical Distribution', end: true },
-  { to: '/storyline', label: 'Storyline', end: true },
 ] as const
 
 function App() {
@@ -40,9 +38,10 @@ function App() {
   const pathname = location.pathname
   const isReaderMode = useMemo(() => pathname.startsWith('/ai-hub/') && pathname.split('/').length >= 3, [pathname])
   const isFullWidth = useMemo(
-    () => pathname.startsWith('/storyline') || pathname.startsWith('/geography'),
+    () => pathname.startsWith('/geography'),
     [pathname],
   )
+  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations')
 
   // Scroll to content on path change
   useEffect(() => {
@@ -137,7 +136,7 @@ function App() {
 
       <main
         id="main"
-        className={`content ${isReaderMode ? 'reader-mode' : ''} ${isFullWidth ? 'full-width-content' : ''}`}
+        className={`content ${isReaderMode ? 'reader-mode' : ''} ${isFullWidth ? 'full-width-content' : ''} ${isWhiteTheme ? 'white-theme-mode' : ''}`}
       >
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
@@ -145,8 +144,7 @@ function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/ai-hub" element={<AIHubPage />} />
           <Route path="/ai-hub/:bookId" element={<AIHubPage />} />
-          <Route path="/storyline" element={<Storytelling />} />
-          <Route path="/geography" element={<GeographicalDistribution />} />
+<Route path="/geography" element={<GeographicalDistribution />} />
           <Route path="/illustrations" element={<IllustrationsPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>

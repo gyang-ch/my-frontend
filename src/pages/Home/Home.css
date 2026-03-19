@@ -1,0 +1,191 @@
+/* Apply white theme to specified pages */
+.content.white-theme-mode {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-family: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+  min-height: 100vh;
+}
+
+/* Ensure all common text elements in white theme are black */
+.white-theme-mode p, 
+.white-theme-mode h1, 
+.white-theme-mode h2, 
+.white-theme-mode h3, 
+.white-theme-mode h4,
+.white-theme-mode span,
+.white-theme-mode div:not(.home-card):not(.home-card *) {
+  color: #000000 !important;
+}
+
+/* Specific component overrides for white theme */
+.white-theme-mode .section-heading,
+.white-theme-mode .illus-heading,
+.white-theme-mode .ai-hub-title,
+.white-theme-mode .period-title {
+  color: #000000 !important;
+  font-family: "Aptos", "Segoe UI", sans-serif !important;
+}
+
+.white-theme-mode .section-description,
+.white-theme-mode .illus-subheading,
+.white-theme-mode .ai-hub-body {
+  color: rgba(0, 0, 0, 0.7) !important;
+  font-family: "Aptos", "Segoe UI", sans-serif !important;
+}
+
+/* Force white background even in dark mode preferences for these pages */
+@media (prefers-color-scheme: dark) {
+  .content.white-theme-mode {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .white-theme-mode p, 
+  .white-theme-mode h1, 
+  .white-theme-mode h2, 
+  .white-theme-mode h3, 
+  .white-theme-mode h4,
+  .white-theme-mode span,
+  .white-theme-mode div:not(.home-card):not(.home-card *) {
+    color: #000000 !important;
+  }
+}
+
+/* Home Page specific layouts (inherited within white-theme-mode) */
+.home {
+  background-color: transparent !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  padding-top: 4rem;
+  padding-bottom: 8rem;
+}
+
+.home-intro {
+  margin-bottom: 6rem;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.home-intro p {
+  font-size: 1.6rem;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: -0.015em;
+  opacity: 0.85;
+}
+
+.home-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 7rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.home-entry {
+  display: flex;
+  align-items: center;
+  gap: 5rem;
+}
+
+.home-entry--right {
+  flex-direction: row-reverse;
+}
+
+/* Base Card Style */
+.home-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem !important;
+  width: 320px;
+  min-width: 320px;
+  min-height: 200px;
+  border-radius: 12px !important;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.06), 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+.home-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Card Specific Themes */
+.home-card--library {
+  background: linear-gradient(135deg, #475569 0%, #1e293b 100%) !important;
+}
+.home-card--library:hover {
+  background: linear-gradient(135deg, #576579 0%, #2e394b 100%) !important;
+}
+
+.home-card--ai-hub {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+}
+.home-card--ai-hub:hover {
+  background: linear-gradient(135deg, #7174f1 0%, #5348ca 100%) !important;
+}
+
+.home-card--illustrations {
+  background: linear-gradient(135deg, #10b981 0%, #065f46 100%) !important;
+}
+.home-card--illustrations:hover {
+  background: linear-gradient(135deg, #20c991 0%, #166f56 100%) !important;
+}
+
+.home-card--geography {
+  background: linear-gradient(135deg, #f97316 0%, #9a3412 100%) !important;
+}
+.home-card--geography:hover {
+  background: linear-gradient(135deg, #fa8326 0%, #aa4422 100%) !important;
+}
+
+.home-card-title {
+  color: #ffffff !important;
+  font-family: "Aptos", "Segoe UI", sans-serif !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.home-card-foot {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  opacity: 0.9;
+  transition: gap 0.3s ease, opacity 0.3s ease;
+}
+
+.home-card:hover .home-card-foot {
+  gap: 0.8rem;
+  opacity: 1;
+}
+
+.home-entry-text {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  font-weight: 300;
+  margin: 0;
+  opacity: 0.8;
+  flex: 1;
+}

@@ -1,49 +1,56 @@
 import { NavLink } from 'react-router-dom'
+import './Home.css'
 
-const cards = [
+const entries = [
   {
     to: '/library',
     title: 'Library',
-    body: 'Browse manuscripts and filter by time and language. Enter the AI Hub from any item.',
-    meta: 'Catalogue + filters',
+    side: 'High-resolution book images are retrieved via IIIF directly from museum and library servers, supporting decentralised access to digital cultural resources.',
+    align: 'left',
   },
   {
     to: '/ai-hub',
     title: 'AI Hub',
-    body: 'A close-reading space for a selected manuscript: zoom, inspect, and interpret.',
-    meta: 'IIIF reader',
+    side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities — analysing both textual and visual materials.',
+    align: 'right',
   },
   {
-    to: '/storyline',
-    title: 'Storyline',
-    body: 'A thematic traversal across motifs and methods—read in fragments or as a flow.',
-    meta: 'Scroll-driven',
+    to: '/illustrations',
+    title: 'Illustrations',
+    side: 'A YOLO model fine-tuned on 1,200 annotated images detects plant illustrations across the collection, transforming machine outputs into a curated visual dataset.',
+    align: 'left',
   },
   {
     to: '/geography',
     title: 'Geographical Distribution',
-    body: 'Situate the archive in space. Explore clusters, outliers, and institutional constellations.',
-    meta: 'Spatial view',
+    side: 'Plant distributions are mapped using kepler.gl and globe.gl, situating the archive in space and engaging spatial humanities methods.',
+    align: 'right',
   },
 ] as const
 
 export function HomePage() {
   return (
     <section className="home">
-      <div className="home-header">
-        <p className="home-subtitle">Enter anywhere. No prescribed order—only adjacent readings.</p>
+      <div className="home-intro">
+        <p>
+          PhytoVision explores the history of botany through digitised historical books,
+          investigating how computer-assisted techniques can enhance the analysis of botanical
+          texts and images at large scale through AI models and IIIF.
+        </p>
       </div>
 
-      <div className="home-grid" role="list">
-        {cards.map((card) => (
-          <NavLink key={card.to} to={card.to} className="home-card" role="listitem">
-            <div className="home-card-meta">{card.meta}</div>
-            <div className="home-card-title">{card.title}</div>
-            <div className="home-card-body">{card.body}</div>
-            <div className="home-card-foot" aria-hidden="true">
-              Open →
-            </div>
-          </NavLink>
+      <div className="home-entries">
+        {entries.map((entry) => (
+          <div key={entry.to} className={`home-entry home-entry--${entry.align}`}>
+            <NavLink 
+              to={entry.to} 
+              className={`home-card home-card--${entry.to.replace('/', '')}`}
+            >
+              <div className="home-card-title">{entry.title}</div>
+              <div className="home-card-foot" aria-hidden="true">Open →</div>
+            </NavLink>
+            <p className="home-entry-text">{entry.side}</p>
+          </div>
         ))}
       </div>
     </section>
