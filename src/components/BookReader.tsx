@@ -518,7 +518,7 @@ Example Output:
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen3.5-9B",
+          model: "Qwen/Qwen3-VL-8B-Instruct",
           messages: [
             {
               role: "user",

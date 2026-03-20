@@ -8,6 +8,7 @@ import { LibraryPage } from './pages/Library/Library'
 import { AIHubPage } from './pages/AIHub/AIHub'
 import { GeographicalDistribution } from './pages/GeographicalDistribution/GeographicalDistribution'
 import { IllustrationsPage } from './pages/Illustrations/Illustrations'
+import { MethodologyPage } from './pages/Methodology/Methodology'
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
@@ -25,6 +26,7 @@ const navItems = [
   { to: '/ai-hub', label: 'AI Hub', end: false },
   { to: '/illustrations', label: 'Illustrations', end: true },
   { to: '/geography', label: 'Geographical Distribution', end: true },
+  { to: '/methodology', label: 'Methodology', end: true },
 ] as const
 
 function App() {
@@ -41,7 +43,7 @@ function App() {
     () => pathname.startsWith('/geography'),
     [pathname],
   )
-  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations')
+  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations') || pathname.startsWith('/methodology')
 
   // Scroll to content on path change
   useEffect(() => {
@@ -146,6 +148,7 @@ function App() {
           <Route path="/ai-hub/:bookId" element={<AIHubPage />} />
 <Route path="/geography" element={<GeographicalDistribution />} />
           <Route path="/illustrations" element={<IllustrationsPage />} />
+          <Route path="/methodology" element={<MethodologyPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
