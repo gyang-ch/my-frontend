@@ -3,14 +3,13 @@ import Globe from 'react-globe.gl';
 import * as d3 from 'd3';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
-import plantPoints from '../../data/plant_points.json';
 import { KeplerMap } from './KeplerMap';
 
 type PlantPoint = { lat: number; lng: number; count: number };
-const plantPointData = plantPoints as PlantPoint[];
 
 export const GeographicalDistribution: React.FC = () => {
   const [hexData, setHexData] = useState<any[]>([]);
+  const [plantPointData, setPlantPointData] = useState<PlantPoint[]>([]);
   const globeRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverData, setHoverData] = useState<{ x: number; y: number; count: number } | null>(null);
@@ -18,13 +17,12 @@ export const GeographicalDistribution: React.FC = () => {
   const [width, setWidth] = useState(Math.min(window.innerWidth - 64, 1200));
 
   useEffect(() => {
-    const globePoints = plantPointData.map(point => ({
-      lat: point.lat,
-      lng: point.lng,
-      weight: point.count
-    }));
-
-    setHexData(globePoints);
+    fetch('/data/plant_points.json')
+      .then(res => res.json())
+      .then((data: PlantPoint[]) => {
+        setPlantPointData(data);
+        setHexData(data.map(point => ({ lat: point.lat, lng: point.lng, weight: point.count })));
+      });
   }, []);
 
   useEffect(() => {

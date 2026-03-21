@@ -3,7 +3,7 @@ import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
-import illustrationsUrl from '../../data/all_illustrations.jsonl?url'
+const illustrationsUrl = '/data/all_illustrations.jsonl'
 import { Paginator } from '../../components/Paginator'
 import './Illustrations.css'
 

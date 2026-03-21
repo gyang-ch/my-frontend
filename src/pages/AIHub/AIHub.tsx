@@ -17,7 +17,7 @@ export function AIHubPage() {
       <section className="ai-hub-empty">
         <h2 className="ai-hub-title">AI Hub</h2>
         <p className="ai-hub-body">
-          The AI Hub opens from a selected manuscript. Choose an item in the Library to begin.
+          The AI Hub opens from a selected book. Choose an item in the Library to begin.
         </p>
         <div className="ai-hub-actions">
           <Link className="ai-hub-link" to="/library">

@@ -6,8 +6,6 @@ import keplerComponents from '@kepler.gl/components';
 import keplerActions from '@kepler.gl/actions';
 import { taskMiddleware } from 'react-palm/tasks';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import plantPoints from '../../data/plant_points.json';
-
 const keplerGlReducer = (keplerReducers as any).keplerGlReducer || keplerReducers;
 const KeplerGl = (keplerComponents as any).KeplerGl || keplerComponents;
 const addDataToMap = (keplerActions as any).addDataToMap || keplerActions;
@@ -24,6 +22,9 @@ const Map = ({ width }: { width: number }) => {
   const mapboxToken = (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined) || '';
 
   useEffect(() => {
+    fetch('/data/plant_points.json')
+      .then(res => res.json())
+      .then((plantPoints: { lat: number; lng: number; count: number }[]) => {
     const data = {
       fields: [
         { name: 'lat', format: '', type: 'real' },
@@ -160,6 +161,7 @@ const Map = ({ width }: { width: number }) => {
         }
       })
     );
+      });
   }, [dispatch]);
 
   return (
