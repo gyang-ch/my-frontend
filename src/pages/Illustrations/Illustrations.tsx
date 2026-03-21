@@ -298,7 +298,7 @@ function IllustrationPopup({
         {/* Source */}
         <div className="illus-popup-section-label">Source</div>
         <MetaRow label="Shelfmark" value={r.book.shelfmark} />
-        <MetaRow label="Page" value={`${r.page.page_number} (index ${r.page.page_index})`} />
+        <MetaRow label="Page" value={`${r.page.page_number}`} />
         <MetaRow label="Page size" value={pageSize} />
 
         <div className="illus-popup-divider" />
