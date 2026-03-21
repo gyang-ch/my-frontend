@@ -3,7 +3,7 @@ import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
-const illustrationsUrl = '/data/all_illustrations.jsonl'
+const illustrationsUrl = '/data/illustrations.public.jsonl'
 import { Paginator } from '../../components/Paginator'
 import './Illustrations.css'
 
@@ -50,6 +50,7 @@ interface IllustrationRecord {
     human_verified: boolean
     verification_notes: string
   }
+  neighbors: string[]
 }
 
 interface IllustrationPhoto extends Photo {
@@ -220,10 +221,14 @@ function IllustrationPopup({
   photo,
   onClose,
   popupRef,
+  photoMap,
+  onSelectNeighbor,
 }: {
   photo: IllustrationPhoto
   onClose: () => void
   popupRef: React.RefObject<HTMLDivElement | null>
+  photoMap: Map<string, IllustrationPhoto>
+  onSelectNeighbor: (photo: IllustrationPhoto) => void
 }) {
   const r = photo.record
   const iiifInfoUrl = getIIIFInfoUrl(r.page.iiif_url)
@@ -233,8 +238,13 @@ function IllustrationPopup({
   const pageSize = `${r.page.image_width} × ${r.page.image_height} px`
   const bboxStr = `(${x1}, ${y1}) → (${x2}, ${y2})`
 
+  const neighborPhotos = (r.neighbors ?? [])
+    .map((id) => photoMap.get(id))
+    .filter((p): p is IllustrationPhoto => p !== undefined)
+
   return (
     <div className="illus-popup" ref={popupRef}>
+      <div className="illus-popup-main">
       {/* ── OSD viewer column ── */}
       {/* Keyed by illustration_id so OSD remounts for each new illustration */}
       <div className="illus-popup-viewer-col">
@@ -340,6 +350,26 @@ function IllustrationPopup({
           </a>
         </div>
       </div>
+      </div>{/* end .illus-popup-main */}
+
+      {/* ── Neighbor illustrations strip ── */}
+      {neighborPhotos.length > 0 && (
+        <div className="illus-popup-neighbors">
+          <div className="illus-popup-neighbors-label">Similar Illustrations</div>
+          <div className="illus-popup-neighbors-strip">
+            {neighborPhotos.map((np) => (
+              <button
+                key={np.record.illustration_id}
+                className="illus-neighbor-thumb"
+                onClick={() => onSelectNeighbor(np)}
+                title={np.record.book.title}
+              >
+                <img src={np.src} alt="" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -356,6 +386,7 @@ export function IllustrationsPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
   const allPhotosRef = useRef<IllustrationPhoto[]>([])
+  const photoMapRef = useRef<Map<string, IllustrationPhoto>>(new Map())
   const popupRef = useRef<HTMLDivElement>(null)
   const gridTopRef = useRef<HTMLDivElement>(null)
 
@@ -379,6 +410,10 @@ export function IllustrationsPage() {
               record,
             }
           })
+        // Build lookup map for neighbor resolution
+        const map = new Map<string, IllustrationPhoto>()
+        allPhotosRef.current.forEach((p) => map.set(p.record.illustration_id, p))
+        photoMapRef.current = map
         // Shuffle in place (Fisher-Yates) so order is random on every page load
         const arr = allPhotosRef.current
         for (let i = arr.length - 1; i > 0; i--) {
@@ -484,7 +519,13 @@ export function IllustrationsPage() {
       <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 
       {selectedPhoto && (
-        <IllustrationPopup photo={selectedPhoto} onClose={closePopup} popupRef={popupRef} />
+        <IllustrationPopup
+          photo={selectedPhoto}
+          onClose={closePopup}
+          popupRef={popupRef}
+          photoMap={photoMapRef.current}
+          onSelectNeighbor={setSelectedPhoto}
+        />
       )}
     </div>
   )

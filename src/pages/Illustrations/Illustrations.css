@@ -84,8 +84,9 @@
   right: 24px;
   z-index: 9999;
   display: flex;
-  width: 740px;
-  height: 480px;
+  flex-direction: column;
+  width: 820px;
+  height: 600px;
   border-radius: 14px;
   overflow: hidden;
   background: #181f2e;
@@ -93,6 +94,13 @@
     0 32px 80px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.07);
   animation: illus-popup-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Top row: viewer + metadata */
+.illus-popup-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 @keyframes illus-popup-in {
@@ -448,4 +456,61 @@
   text-align: center;
   color: #fc8181;
   font-size: 1rem;
+}
+
+/* ── Neighbor illustrations strip ────────────────────────── */
+
+.illus-popup-neighbors {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.55rem 0 0.6rem;
+}
+
+.illus-popup-neighbors-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #a0aec0;
+  padding: 0 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.illus-popup-neighbors-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2d3748 transparent;
+}
+
+.illus-popup-neighbors-strip::-webkit-scrollbar { height: 3px; }
+.illus-popup-neighbors-strip::-webkit-scrollbar-thumb {
+  background: #2d3748;
+  border-radius: 3px;
+}
+
+.illus-neighbor-thumb {
+  flex-shrink: 0;
+  padding: 0;
+  background: #0a0e18;
+  cursor: pointer;
+  border-radius: 5px;
+  overflow: hidden;
+  height: 76px;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.illus-neighbor-thumb:hover {
+  border-color: #34d399;
+  transform: scale(1.06);
+}
+
+.illus-neighbor-thumb img {
+  height: 76px;
+  width: auto;
+  display: block;
 }
