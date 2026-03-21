@@ -80,6 +80,7 @@ const ThumbnailImage: React.FC<{ src: string; isSelected: boolean; isNearSelecte
 
 export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const API_BASE_URL = (
+    (window as any).APP_CONFIG?.API_URL ||
     import.meta.env.VITE_API_URL ||
     import.meta.env.VITE_API_BASE_URL ||
     'http://localhost:8000'
