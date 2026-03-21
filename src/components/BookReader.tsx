@@ -207,6 +207,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isQwenTranscribing, setIsQwenTranscribing] = useState(false);
   const [qwenThinking, setQwenThinking] = useState<string | null>(null);
+  const [qwenResults, setQwenResults] = useState<string[]>([]);
   const [ocrResults, setOcrResults] = useState<OCRResult[]>([]);
   const [characterBoxes, setCharacterBoxes] = useState<CharacterBox[]>([]);
   
@@ -266,7 +267,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   }, [book.manifestUrl]);
 
   const handleTranslate = async () => {
-    const textToTranslate = ocrResults.map((line) => line.text).join('\n').trim();
+    const textToTranslate = (qwenResults.length > 0 ? qwenResults.join('\n') : ocrResults.map((line) => line.text).join('\n')).trim();
     if (!textToTranslate) return;
 
     setIsTranslating(true);
@@ -390,7 +391,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   };
 
   const handleCopyTranscription = async () => {
-    const textToCopy = ocrResults.map((line) => line.text).join('\n').trim();
+    const textToCopy = (qwenResults.length > 0 ? qwenResults.join('\n') : ocrResults.map((line) => line.text).join('\n')).trim();
     if (!textToCopy) return;
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -407,6 +408,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
     try {
       setIsTranscribing(true);
       setOcrResults([]);
+      setQwenResults([]);
       setCharacterBoxes([]);
       setTranslatedText(null);
       setCurrentOcrUrl(null);
@@ -465,6 +467,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       setIsQwenTranscribing(true);
       setQwenThinking(""); // Initialize to empty string so Thinking UI appears immediately
       setOcrResults([]);
+      setQwenResults([]);
       setCharacterBoxes([]);
       setTranslatedText(null);
       setCurrentOcrUrl(null);
@@ -489,26 +492,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         console.warn("Could not fetch info.json", e);
       }
 
-      const promptText = `You are a professional OCR engine. Your task is to perform exhaustive literal transcription of ALL text found in the provided image. 
-Do NOT describe the image. Do NOT summarize the content. Do NOT provide any commentary or metadata. 
-The image may contain a two-page spread; transcribe ALL text on BOTH pages. 
-The document may be in any language (Arabic, Latin, European languages, Chinese, etc.) and may be handwritten or printed. 
-Transcribe the text EXACTLY as it appears, in its original script/language.
-
-CRITICAL INSTRUCTION ON BOUNDING BOXES:
-You MUST provide a UNIQUE and ACCURATE bounding box for EVERY SINGLE LINE of text. 
-Do NOT copy and paste the same bounding box for multiple lines. Each bounding box must strictly correspond to the actual physical location of the transcribed line on the image.
-
-For each line of text, you MUST provide the bounding box and the transcribed text in this EXACT format:
-[ymin, xmin, ymax, xmax] transcribed_text
-
-Coordinates must be integers between 0 and 1000 relative to the image size.
-Output ONLY the transcribed lines in the specified format.
-
-Example Output:
-[120, 250, 160, 750] This is a line of text in English.
-[180, 260, 220, 740] هذه جملة باللغة العربية.
-[240, 270, 280, 730] 這是一行中文文本。`;
+      const promptText = `You are a professional OCR engine. Your task is to perform exhaustive literal transcription of ALL text found in the provided image.
+Do NOT describe the image. Do NOT summarize the content. Do NOT provide any commentary, metadata, or bounding boxes.
+The image may contain a two-page spread; transcribe ALL text on BOTH pages.
+The document may be in any language (Arabic, Latin, European languages, Chinese, etc.) and may be handwritten or printed.
+Transcribe the text EXACTLY as it appears, in its original script/language, line by line.
+Output ONLY the transcribed lines of text, one per line. Nothing else.`;
       
       setOcrDebug(prev => prev ? { ...prev, status: "Waiting for Together API..." } : null);
 
@@ -595,60 +584,24 @@ Example Output:
         console.warn("Qwen returned empty content.");
       }
 
-      const parsed_lines: OCRResult[] = [];
-      const lines = rawContent.split('\n');
-      const pattern = /(?:\[|\()?\s*(\d+)\s*,\s*(\d+)\s*(?:\]|\)|,)\s*(?:\[|\()?(\d+)\s*,\s*(\d+)\s*(?:\]|\))?\s*(?::|-)?\s*(.+)/;
+      // Strip out <think>...</think> block entirely, then take each non-empty line
+      const contentWithoutThinking = rawContent
+        .replace(/<think>[\s\S]*?<\/think>/g, '')
+        .trim();
 
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) continue;
-        
-        // Skip reasoning blocks
-        if (trimmedLine === "<think>" || trimmedLine === "</think>" || trimmedLine.startsWith("```")) {
-          continue;
-        }
-        
-        const match = trimmedLine.match(pattern);
-        if (match) {
-          const y1 = parseInt(match[1], 10);
-          const x1 = parseInt(match[2], 10);
-          const y2 = parseInt(match[3], 10);
-          const x2 = parseInt(match[4], 10);
-          const text = match[5].trim();
-          
-          const px1 = (x1 / 1000.0) * originalWidth;
-          const py1 = (y1 / 1000.0) * originalHeight;
-          const px2 = (x2 / 1000.0) * originalWidth;
-          const py2 = (y2 / 1000.0) * originalHeight;
-          
-          parsed_lines.push({
-            text, baseline: [], boundary: [[px1, py1], [px2, py1], [px2, py2], [px1, py2]], confidence: 1.0
-          });
-        } else if (!trimmedLine.match(/^[a-zA-Z0-9\s]+$/) && trimmedLine.length > 5) {
-          // Fallback
-          parsed_lines.push({
-            text: trimmedLine,
-            baseline: [],
-            boundary: [[0, 0], [originalWidth, 0], [originalWidth, originalHeight], [0, originalHeight]],
-            confidence: 1.0
-          });
-        }
-      }
-      
+      const parsed_lines: string[] = contentWithoutThinking
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0 && l !== '```');
+
       let finalStatus = "Completed";
       if (parsed_lines.length === 0 && rawContent.trim()) {
-         parsed_lines.push({
-            text: "No formatted lines found. See raw output.",
-            baseline: [],
-            boundary: [[0, 0], [originalWidth, 0], [originalWidth, originalHeight], [0, originalHeight]],
-            confidence: 1.0
-          });
-          finalStatus = "Parsing Failed (Regex)";
+        parsed_lines.push("No text found. See raw output.");
+        finalStatus = "Parsing Failed";
       }
 
-      setOcrResults(parsed_lines);
+      setQwenResults(parsed_lines);
       setQwenThinking(null); // Clear thinking ONLY AFTER results are set to avoid flicker
-      setImageSize({ width: originalWidth, height: originalHeight });
       setCurrentOcrUrl(imageUrl);
       
       setOcrDebug({
@@ -1153,7 +1106,8 @@ Example Output:
                 initialPage={selectedPageIndex}
                 onPageChange={(page) => {
                   setSelectedPageIndex(page);
-                  setOcrResults([]); 
+                  setOcrResults([]);
+                  setQwenResults([]);
                   setPlantDetections([]);
                   setCharacterBoxes([]);
                   setImageSize(null);
@@ -1318,10 +1272,10 @@ Example Output:
               </button>
             </div>
 
-            {(ocrResults.length > 0 || plantDetections.length > 0 || qwenThinking !== null || isQwenTranscribing) ? (
+            {(ocrResults.length > 0 || qwenResults.length > 0 || plantDetections.length > 0 || qwenThinking !== null || isQwenTranscribing) ? (
               <div className="side-results-container">
                 {plantDetections.length > 0 && (
-                  <div className="plant-results-list" style={{ padding: '0.8rem 1.25rem 1rem 1.25rem', borderBottom: (ocrResults.length > 0 || qwenThinking !== null || isQwenTranscribing) ? '1px solid #4a5568' : 'none' }}>
+                  <div className="plant-results-list" style={{ padding: '0.8rem 1.25rem 1rem 1.25rem', borderBottom: (ocrResults.length > 0 || qwenResults.length > 0 || qwenThinking !== null || isQwenTranscribing) ? '1px solid #4a5568' : 'none' }}>
                     <h4 style={{ 
                       color: '#94a3b8', 
                       fontWeight: '700', 
@@ -1354,7 +1308,7 @@ Example Output:
                     </div>                  </div>
                 )}
 
-                {(ocrResults.length > 0 || qwenThinking !== null || isQwenTranscribing) && (
+                {(ocrResults.length > 0 || qwenResults.length > 0 || qwenThinking !== null || isQwenTranscribing) && (
                   <div className="transcription-results" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div className="transcription-shell" style={{ border: 'none', background: 'transparent', boxShadow: 'none', height: '100%' }}>
                       <div className="results-header" style={{ border: 'none', background: 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1364,25 +1318,27 @@ Example Output:
                           fontSize: '0.95rem', 
                           letterSpacing: '0.08em', 
                           margin: '0.3rem 0 0 0.65rem' 
-                        }}>{qwenThinking !== null ? 'Qwen AI Reasoning' : 'Transcription'}</h4>
+                        }}>{qwenThinking !== null ? 'Qwen AI Reasoning' : qwenResults.length > 0 ? 'Qwen Transcription' : 'Transcription'}</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.65rem', marginTop: '0.3rem' }}>
                           <button
                             onClick={handleCopyTranscription}
-                            disabled={ocrResults.length === 0}
+                            disabled={ocrResults.length === 0 && qwenResults.length === 0}
                             className="osd-btn copy-transcription-btn"
                             style={{
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
                               padding: '6px 12px',
+                              width: 'fit-content',
+                              whiteSpace: 'nowrap',
                               background: isCopied ? 'rgba(16, 185, 129, 0.2)' : '#334155',
                               color: isCopied ? '#10b981' : '#e2e8f0',
                               border: `1px solid ${isCopied ? '#10b981' : '#475569'}`,
                               borderRadius: '6px',
-                              cursor: ocrResults.length === 0 ? 'not-allowed' : 'pointer',
+                              cursor: (ocrResults.length === 0 && qwenResults.length === 0) ? 'not-allowed' : 'pointer',
                               fontSize: '0.75rem',
                               fontWeight: '700',
-                              opacity: ocrResults.length === 0 ? 0.6 : 1,
+                              opacity: (ocrResults.length === 0 && qwenResults.length === 0) ? 0.6 : 1,
                               letterSpacing: '0.5px'
                             }}
                             title="Copy all transcription to clipboard"
@@ -1401,7 +1357,7 @@ Example Output:
                           </button>
                           <button
                             onClick={handleTranslate}
-                            disabled={isTranslating || ocrResults.length === 0}
+                            disabled={isTranslating || (ocrResults.length === 0 && qwenResults.length === 0)}
                             className="osd-btn translate-btn"
                             style={{
                               display: 'flex',
@@ -1412,10 +1368,10 @@ Example Output:
                               color: '#e2e8f0',
                               border: '1px solid #475569',
                               borderRadius: '6px',
-                              cursor: (isTranslating || ocrResults.length === 0) ? 'not-allowed' : 'pointer',
+                              cursor: (isTranslating || (ocrResults.length === 0 && qwenResults.length === 0)) ? 'not-allowed' : 'pointer',
                               fontSize: '0.75rem',
                               fontWeight: '700',
-                              opacity: (isTranslating || ocrResults.length === 0) ? 0.6 : 1,
+                              opacity: (isTranslating || (ocrResults.length === 0 && qwenResults.length === 0)) ? 0.6 : 1,
                               letterSpacing: '0.5px'
                             }}
                             title="Translate to English"
@@ -1428,7 +1384,7 @@ Example Output:
                             ) : (
                               <>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>
-                                <span>Translate to English</span>
+                                <span style={{ whiteSpace: 'nowrap' }}>Translate to English</span>
                               </>
                             )}
                           </button>
@@ -1436,6 +1392,7 @@ Example Output:
                       </div>
                       <div className="text-display-panel" style={{ position: 'relative', flex: 1, overflow: 'auto' }}>
                         {qwenThinking !== null ? (
+                          // Qwen is still thinking — show live reasoning stream
                           <div style={{
                             padding: '24px',
                             color: '#94a3b8',
@@ -1446,29 +1403,54 @@ Example Output:
                             background: 'rgba(15, 23, 42, 0.3)',
                             minHeight: '100%'
                           }}>
-                            <div style={{ 
-                              marginBottom: '16px', 
-                              color: '#63b3ed', 
-                              fontWeight: 800, 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '10px', 
-                              fontSize: '0.7rem', 
-                              textTransform: 'uppercase', 
-                              letterSpacing: '0.1em' 
+                            <div style={{
+                              marginBottom: '16px',
+                              color: '#63b3ed',
+                              fontWeight: 800,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontSize: '0.7rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em'
                             }}>
-                              <div className="btn-loader" style={{ 
-                                width: '12px', 
-                                height: '12px', 
-                                margin: 0, 
-                                border: '2px solid rgba(99, 179, 237, 0.2)', 
-                                borderTop: '2px solid #63b3ed' 
+                              <div className="btn-loader" style={{
+                                width: '12px',
+                                height: '12px',
+                                margin: 0,
+                                border: '2px solid rgba(99, 179, 237, 0.2)',
+                                borderTop: '2px solid #63b3ed'
                               }}></div>
                               Qwen AI Thinking...
                             </div>
                             {qwenThinking || "Waiting for reasoning process..."}
                           </div>
+                        ) : qwenResults.length > 0 ? (
+                          // Qwen finished — show plain text, no line boxes
+                          <div style={{ width: 'max-content', minWidth: '100%', position: 'relative', padding: '10px 0' }}>
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              style={{
+                                outline: 'none',
+                                color: '#e2e8f0',
+                                whiteSpace: 'pre',
+                                lineHeight: 1.6,
+                                paddingLeft: '32px',
+                                paddingRight: '48px',
+                                minHeight: '100%',
+                                cursor: 'text'
+                              }}
+                              onBlur={(e) => {
+                                const lines = (e.currentTarget.textContent || '').split('\n');
+                                setQwenResults(lines.map(l => l.trim()).filter(l => l.length > 0));
+                              }}
+                            >
+                              {qwenResults.join('\n')}
+                            </div>
+                          </div>
                         ) : (
+                          // Kraken OCR — show with line hover highlights
                           <div style={{ width: 'max-content', minWidth: '100%', position: 'relative', padding: '10px 0' }}>
                             <div
                               contentEditable
@@ -1508,7 +1490,7 @@ Example Output:
 
                             <div style={{ position: 'absolute', top: '12px', left: 0, bottom: '12px', width: '100%', pointerEvents: 'none' }}>
                               {ocrResults.map((line, idx) => (
-                                <div 
+                                <div
                                   key={idx}
                                   className={`text-line-overlay ${highlightIndex === idx ? 'highlighted' : ''}`}
                                   style={{
@@ -1524,15 +1506,15 @@ Example Output:
                                     boxSizing: 'border-box'
                                   }}
                                 >
-                                  <span 
-                                    className="line-no" 
+                                  <span
+                                    className="line-no"
                                     onMouseEnter={() => setHighlightIndex(idx)}
                                     onMouseLeave={() => setHighlightIndex(null)}
                                     style={{ pointerEvents: 'auto', userSelect: 'none', width: '24px', opacity: 0.7, fontSize: '0.85em', paddingTop: '0.15em' }}
                                   >
                                     {idx + 1}
                                   </span>
-                                  
+
                                   <button
                                     onClick={() => {
                                       navigator.clipboard.writeText(line.text || '').then(() => {});
