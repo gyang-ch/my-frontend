@@ -274,6 +274,14 @@ const Map = ({ width }: { width: number }) => {
           display: none !important;
         }
 
+        /* Hide Kepler.gl notification popups */
+        .kepler-map-container .notification-panel,
+        .kepler-map-container .notification-item,
+        .kepler-map-container [class*="notification-panel"],
+        .kepler-map-container [class*="NotificationPanel"] {
+          display: none !important;
+        }
+
         /* Customize legend to match */
         .kepler-map-container .map-control .map-legend {
           background-color: rgba(255, 255, 255, 0.95) !important;
