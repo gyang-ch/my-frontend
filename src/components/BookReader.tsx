@@ -5,6 +5,7 @@ import type { OCRResult } from './IIIFViewer';
 import type { CharacterBox } from './IIIFViewer';
 import type { BookRecord } from '../data/books';
 import { getPlantColor } from '../utils/colors';
+import { bookLangToCode, getPrompt, getDecodingParams } from '../utils/ocrProfiles';
 
 interface BookReaderProps {
   book: BookRecord;
@@ -478,7 +479,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       setOcrDebug({
         status: "Processing Qwen (Frontend)...",
         requestedUrl: imageUrl,
-        lang: "auto",
+        lang: bookLangToCode(book.language || []),
       });
 
       let originalWidth = 1000;
@@ -492,14 +493,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         console.warn("Could not fetch info.json", e);
       }
 
-      const promptText = `You are a professional OCR engine. Your task is to perform exhaustive literal transcription of ALL text found in the provided image.
-Do NOT describe the image. Do NOT summarize the content. Do NOT provide any commentary, metadata, or bounding boxes.
-The image may contain a two-page spread; transcribe ALL text on BOTH pages.
-The document may be in any language (Arabic, Latin, European languages, Chinese, etc.) and may be handwritten or printed.
-Transcribe the text EXACTLY as it appears, in its original script/language, line by line.
-Output ONLY the transcribed lines of text, one per line. Nothing else.`;
-      
-      setOcrDebug(prev => prev ? { ...prev, status: "Waiting for Together API..." } : null);
+      const langCode = bookLangToCode(book.language || []);
+      const promptText = getPrompt(langCode);
+      const decodingParams = getDecodingParams(langCode);
+
+      setOcrDebug(prev => prev ? { ...prev, status: "Waiting for Together API...", lang: langCode } : null);
 
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
@@ -520,7 +518,9 @@ Output ONLY the transcribed lines of text, one per line. Nothing else.`;
           ],
           max_tokens: 8192,
           stream: true,
-          temperature: 0.1
+          temperature: decodingParams.temperature,
+          repetition_penalty: decodingParams.repetition_penalty,
+          frequency_penalty: decodingParams.frequency_penalty,
         })
       });
 
@@ -1199,7 +1199,7 @@ Output ONLY the transcribed lines of text, one per line. Nothing else.`;
                 <div className="glow-btn-fill"></div>
                 <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
                   {isTranscribing ? <div className="loading-spinner" /> : <span>✨</span>}
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isTranscribing ? 'OCR...' : 'OCR'}</span>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isTranscribing ? 'Kraken...' : 'Kraken'}</span>
                 </div>
               </button>
 
@@ -1241,7 +1241,7 @@ Output ONLY the transcribed lines of text, one per line. Nothing else.`;
                 <div className="glow-btn-fill" style={{ background: 'linear-gradient(90deg, #3b82f6, #2dd4bf)' }}></div>
                 <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
                   {isQwenTranscribing ? <div className="loading-spinner" /> : <span>🤖</span>}
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isQwenTranscribing ? 'QWEN...' : 'QWEN'}</span>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isQwenTranscribing ? 'Qwen...' : 'Qwen'}</span>
                 </div>
               </button>
 
