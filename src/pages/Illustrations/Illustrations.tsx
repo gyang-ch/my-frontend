@@ -223,7 +223,7 @@ function IllustrationPopup({
 }: {
   photo: IllustrationPhoto
   onClose: () => void
-  popupRef: React.RefObject<HTMLDivElement>
+  popupRef: React.RefObject<HTMLDivElement | null>
 }) {
   const r = photo.record
   const iiifInfoUrl = getIIIFInfoUrl(r.page.iiif_url)
