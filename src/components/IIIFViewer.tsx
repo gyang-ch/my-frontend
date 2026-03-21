@@ -53,7 +53,7 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
         prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
         tileSources: tileSources,
         initialPage: initialPage,
-        crossOriginPolicy: 'Anonymous',
+        crossOriginPolicy: false,
         showNavigationControl: false,
         showSequenceControl: false,
         showNavigator: true,

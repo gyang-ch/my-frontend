@@ -654,8 +654,24 @@ Output ONLY the transcribed lines of text, one per line. Nothing else.`;
   };
 
   if (loading) return <div className="loading" style={{ padding: '2rem', textAlign: 'center' }}>Loading Manifest...</div>;
-  if (error) return <div className="error" style={{ padding: '2rem', textAlign: 'center' }}>{error} <button onClick={onBack}>Back</button></div>;
-  if (!tileSources || tileSources.length === 0) return <div className="error" style={{ padding: '2rem', textAlign: 'center' }}>No images found. <button onClick={onBack}>Back</button></div>;
+  if (error) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '4rem 2rem', textAlign: 'center' }}>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fc8181" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>{error}</p>
+      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Library</button>
+    </div>
+  );
+  if (!tileSources || tileSources.length === 0) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '4rem 2rem', textAlign: 'center' }}>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fc8181" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>No images found.</p>
+      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Library</button>
+    </div>
+  );
 
   return (
     <div className="book-reader-wrapper" style={{ display: 'flex', flexDirection: 'column', width: '100%', margin: 0 }}>

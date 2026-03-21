@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { BookRecord } from '../data/books';
+import { Paginator } from './Paginator';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -63,42 +64,30 @@ const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = (
 };
 
 
+const BOOKS_PER_PAGE = 18;
+
 export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
-  const [visibleCount, setVisibleCount] = useState(6);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
+  const totalPages = Math.max(1, Math.ceil(books.length / BOOKS_PER_PAGE));
+
+  // Reset to page 1 whenever the book list changes (filter/period change)
   useEffect(() => {
-    setVisibleCount(6);
+    setCurrentPage(1);
     if (ctxRef.current) {
       ctxRef.current.revert();
       ctxRef.current = null;
     }
   }, [books]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + 6, books.length));
-        }
-      },
-      { threshold: 0.1 }
-    );
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
-    };
-  }, [books]);
-
-  const visibleBooks = books.slice(0, visibleCount);
+  const visibleBooks = books.slice((currentPage - 1) * BOOKS_PER_PAGE, currentPage * BOOKS_PER_PAGE);
 
   useLayoutEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -138,7 +127,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
         });
       });
     }
-  }, [visibleBooks.length]);
+  }, [currentPage, books]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -160,7 +149,12 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
 
   return (
     <div className="book-detail-container">
-      <h2 className="period-title">Books from {period}</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1rem' }}>
+        <h2 className="period-title" style={{ margin: 0 }}>Books from {period}</h2>
+        <span style={{ color: '#475569', fontSize: '0.8rem' }}>
+          {books.length} {books.length === 1 ? 'book' : 'books'} · page {currentPage} of {totalPages}
+        </span>
+      </div>
       <div className="books-grid" ref={gridRef}>
         {visibleBooks.map((book) => (
           <article
@@ -253,11 +247,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
           </article>
         ))}
       </div>
-      {visibleCount < books.length && (
-        <div ref={observerTarget} style={{ height: '40px', margin: '20px 0', textAlign: 'center', color: '#718096' }}>
-          Scroll for more...
-        </div>
-      )}
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
     </div>
   );
 };

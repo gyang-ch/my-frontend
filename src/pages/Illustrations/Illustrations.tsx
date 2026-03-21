@@ -1,16 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
-import InfiniteScroll from 'react-photo-album/scroll'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
 import illustrationsUrl from '../../data/all_illustrations.jsonl?url'
+import { Paginator } from '../../components/Paginator'
 import './Illustrations.css'
 
 const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
 const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
-
-const BATCH_SIZE = 80
 
 interface IllustrationRecord {
   illustration_id: string
@@ -221,9 +219,11 @@ function MetaRow({ label, value }: { label: string; value: string | number }) {
 function IllustrationPopup({
   photo,
   onClose,
+  popupRef,
 }: {
   photo: IllustrationPhoto
   onClose: () => void
+  popupRef: React.RefObject<HTMLDivElement>
 }) {
   const r = photo.record
   const iiifInfoUrl = getIIIFInfoUrl(r.page.iiif_url)
@@ -234,7 +234,7 @@ function IllustrationPopup({
   const bboxStr = `(${x1}, ${y1}) → (${x2}, ${y2})`
 
   return (
-    <div className="illus-popup" onClick={(e) => e.stopPropagation()}>
+    <div className="illus-popup" ref={popupRef}>
       {/* ── OSD viewer column ── */}
       {/* Keyed by illustration_id so OSD remounts for each new illustration */}
       <div className="illus-popup-viewer-col">
@@ -330,8 +330,7 @@ function IllustrationPopup({
 
         {/* Footer */}
         <div className="illus-popup-footer">
-          <span className="illus-popup-id">{r.illustration_id}</span>
-          <a
+<a
             href={r.book.iiif_manifest}
             target="_blank"
             rel="noreferrer"
@@ -347,13 +346,18 @@ function IllustrationPopup({
 
 // ── Page ──────────────────────────────────────────────────
 
+const ILLUS_PER_PAGE = 100
+
 export function IllustrationsPage() {
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState(0)
   const [selectedPhoto, setSelectedPhoto] = useState<IllustrationPhoto | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const allPhotosRef = useRef<IllustrationPhoto[]>([])
+  const popupRef = useRef<HTMLDivElement>(null)
+  const gridTopRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(illustrationsUrl)
@@ -390,25 +394,40 @@ export function IllustrationsPage() {
       })
   }, [])
 
-  // Close popup on Escape
+  // Close popup on Escape or click outside the card / illustrations
   useEffect(() => {
     if (!selectedPhoto) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedPhoto(null) }
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node
+      // Keep open if click is inside the popup card
+      if (popupRef.current?.contains(target)) return
+      // Keep open if click is on a photo (its own onClick will handle toggling)
+      if ((target as Element).closest?.('.illus-photo-wrapper')) return
+      setSelectedPhoto(null)
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onPointerDown)
+    }
   }, [selectedPhoto])
 
-  const fetchBatch = useCallback(
-    (index: number): Promise<IllustrationPhoto[] | null> => {
-      const start = index * BATCH_SIZE
-      const all = allPhotosRef.current
-      if (start >= all.length) return Promise.resolve(null)
-      return Promise.resolve(all.slice(start, start + BATCH_SIZE))
-    },
-    [],
-  )
+  const closePopup = () => setSelectedPhoto(null)
 
-  const closePopup = useCallback(() => setSelectedPhoto(null), [])
+  const totalPages = Math.max(1, Math.ceil(totalCount / ILLUS_PER_PAGE))
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    setSelectedPhoto(null)
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const pagePhotos = allPhotosRef.current.slice(
+    (currentPage - 1) * ILLUS_PER_PAGE,
+    currentPage * ILLUS_PER_PAGE,
+  )
 
   if (dataLoading) {
     return (
@@ -424,8 +443,7 @@ export function IllustrationsPage() {
   }
 
   return (
-    // Clicking the page background closes the popup
-    <div className="illus-page" onClick={closePopup}>
+    <div className="illus-page">
       <div className="illus-header">
         <h2 className="illus-heading">Botanical Illustrations</h2>
         <p className="illus-subheading">
@@ -434,34 +452,39 @@ export function IllustrationsPage() {
         </p>
       </div>
 
-      <InfiniteScroll<IllustrationPhoto>
-        fetch={fetchBatch}
-        singleton
-        loading={<div className="illus-batch-loading"><div className="illus-spinner" /></div>}
-        finished={<p className="illus-finished">All {totalCount.toLocaleString()} illustrations loaded.</p>}
-      >
-        <MasonryPhotoAlbum<IllustrationPhoto>
-          photos={[]}
-          columns={(w) => (w < 500 ? 2 : w < 800 ? 3 : w < 1100 ? 4 : 5)}
-          spacing={6}
-          componentsProps={{
-            wrapper: ({ photo }) => ({
-              className: `illus-photo-wrapper${selectedPhoto?.key === photo.key ? ' illus-photo-selected' : ''}`,
-              onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-                e.stopPropagation()
-                setSelectedPhoto(selectedPhoto?.key === photo.key ? null : photo)
-              },
-            }),
-            image: {
-              loading: 'lazy' as const,
-              className: 'illus-photo-img',
+      {/* Page info bar */}
+      <div ref={gridTopRef} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <span style={{ color: '#475569', fontSize: '0.8rem' }}>
+          Showing {((currentPage - 1) * ILLUS_PER_PAGE + 1).toLocaleString()}–{Math.min(currentPage * ILLUS_PER_PAGE, totalCount).toLocaleString()} of {totalCount.toLocaleString()}
+        </span>
+        <span style={{ color: '#475569', fontSize: '0.8rem' }}>
+          Page {currentPage} of {totalPages}
+        </span>
+      </div>
+
+      <MasonryPhotoAlbum<IllustrationPhoto>
+        photos={pagePhotos}
+        columns={(w) => (w < 500 ? 2 : w < 800 ? 3 : w < 1100 ? 4 : 5)}
+        spacing={6}
+        componentsProps={{
+          wrapper: ({ photo }) => ({
+            className: `illus-photo-wrapper${selectedPhoto?.key === photo.key ? ' illus-photo-selected' : ''}`,
+            onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+              e.stopPropagation()
+              setSelectedPhoto(photo)
             },
-          }}
-        />
-      </InfiniteScroll>
+          }),
+          image: {
+            loading: 'lazy' as const,
+            className: 'illus-photo-img',
+          },
+        }}
+      />
+
+      <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 
       {selectedPhoto && (
-        <IllustrationPopup photo={selectedPhoto} onClose={closePopup} />
+        <IllustrationPopup photo={selectedPhoto} onClose={closePopup} popupRef={popupRef} />
       )}
     </div>
   )
