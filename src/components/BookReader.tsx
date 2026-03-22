@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 import { gsap } from 'gsap';
 import { IIIFViewer } from './IIIFViewer';
 import type { OCRResult } from './IIIFViewer';
@@ -1161,131 +1163,137 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
               borderRadius: '12px',
               border: '1px solid #4a5568'
             }}>
-              <button 
-                className={`glow-btn-group transcribe-btn-new ${isTranscribing ? 'loading' : ''}`}
-                onMouseEnter={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const fromTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.fromTo(fill, 
-                    { y: fromTop ? '-100%' : '100%' }, 
-                    { y: '0%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onMouseLeave={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const toTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.to(fill, 
-                    { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onClick={(e) => {
-                  const btn = e.currentTarget;
-                  gsap.timeline()
-                    .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
-                    .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
-                  handleTranscribe();
-                }}
-                disabled={isTranscribing || isDetecting || isQwenTranscribing}
-                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
-              >
-                <div className="glow-btn-fill"></div>
-                <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
-                  {isTranscribing ? <div className="loading-spinner" /> : <span>✨</span>}
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isTranscribing ? 'Kraken...' : 'Kraken'}</span>
-                </div>
-              </button>
+              <Tippy content="Transcription by Kraken" placement="top" delay={0} animation={false}>
+                <button
+                  className={`glow-btn-group transcribe-btn-new ${isTranscribing ? 'loading' : ''}`}
+                  onMouseEnter={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const fromTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.fromTo(fill,
+                      { y: fromTop ? '-100%' : '100%' },
+                      { y: '0%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onMouseLeave={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const toTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.to(fill,
+                      { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onClick={(e) => {
+                    const btn = e.currentTarget;
+                    gsap.timeline()
+                      .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
+                      .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
+                    handleTranscribe();
+                  }}
+                  disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                  style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
+                >
+                  <div className="glow-btn-fill"></div>
+                  <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
+                    {isTranscribing ? <div className="loading-spinner" /> : <span>✨</span>}
+                    <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isTranscribing ? 'Kraken...' : 'Kraken'}</span>
+                  </div>
+                </button>
+              </Tippy>
 
-              <button 
-                className={`glow-btn-group transcribe-btn-new ${isQwenTranscribing ? 'loading' : ''}`}
-                onMouseEnter={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const fromTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.fromTo(fill, 
-                    { y: fromTop ? '-100%' : '100%' }, 
-                    { y: '0%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onMouseLeave={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const toTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.to(fill, 
-                    { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onClick={(e) => {
-                  const btn = e.currentTarget;
-                  gsap.timeline()
-                    .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
-                    .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
-                  handleQwenTranscribe();
-                }}
-                disabled={isTranscribing || isDetecting || isQwenTranscribing}
-                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
-              >
-                <div className="glow-btn-fill" style={{ background: 'linear-gradient(90deg, #3b82f6, #2dd4bf)' }}></div>
-                <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
-                  {isQwenTranscribing ? <div className="loading-spinner" /> : <span>🤖</span>}
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isQwenTranscribing ? 'Qwen...' : 'Qwen'}</span>
-                </div>
-              </button>
+              <Tippy content="Transcription by Qwen" placement="top" delay={0} animation={false}>
+                <button
+                  className={`glow-btn-group transcribe-btn-new ${isQwenTranscribing ? 'loading' : ''}`}
+                  onMouseEnter={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const fromTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.fromTo(fill,
+                      { y: fromTop ? '-100%' : '100%' },
+                      { y: '0%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onMouseLeave={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const toTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.to(fill,
+                      { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onClick={(e) => {
+                    const btn = e.currentTarget;
+                    gsap.timeline()
+                      .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
+                      .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
+                    handleQwenTranscribe();
+                  }}
+                  disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                  style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
+                >
+                  <div className="glow-btn-fill" style={{ background: 'linear-gradient(90deg, #3b82f6, #2dd4bf)' }}></div>
+                  <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
+                    {isQwenTranscribing ? <div className="loading-spinner" /> : <span>🤖</span>}
+                    <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isQwenTranscribing ? 'Qwen...' : 'Qwen'}</span>
+                  </div>
+                </button>
+              </Tippy>
 
-              <button 
-                className={`glow-btn-group detect-btn-new ${isDetecting ? 'loading' : ''}`}
-                onMouseEnter={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const fromTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.fromTo(fill, 
-                    { y: fromTop ? '-100%' : '100%' }, 
-                    { y: '0%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onMouseLeave={(e) => {
-                  const btn = e.currentTarget;
-                  const fill = btn.querySelector('.glow-btn-fill');
-                  if (!fill) return;
-                  const rect = btn.getBoundingClientRect();
-                  const toTop = e.clientY < rect.top + rect.height / 2;
-                  gsap.killTweensOf(fill);
-                  gsap.to(fill, 
-                    { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
-                  );
-                }}
-                onClick={(e) => {
-                  const btn = e.currentTarget;
-                  gsap.timeline()
-                    .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
-                    .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
-                  handleDetectPlants();
-                }}
-                disabled={isTranscribing || isDetecting || isQwenTranscribing}
-                style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
-              >
-                <div className="glow-btn-fill"></div>
-                <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
-                  {isDetecting ? <div className="loading-spinner" /> : <span>🌿</span>}
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isDetecting ? 'YOLO...' : 'YOLO'}</span>
-                </div>
-              </button>
+              <Tippy content="Detect plants" placement="top" delay={0} animation={false}>
+                <button
+                  className={`glow-btn-group detect-btn-new ${isDetecting ? 'loading' : ''}`}
+                  onMouseEnter={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const fromTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.fromTo(fill,
+                      { y: fromTop ? '-100%' : '100%' },
+                      { y: '0%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onMouseLeave={(e) => {
+                    const btn = e.currentTarget;
+                    const fill = btn.querySelector('.glow-btn-fill');
+                    if (!fill) return;
+                    const rect = btn.getBoundingClientRect();
+                    const toTop = e.clientY < rect.top + rect.height / 2;
+                    gsap.killTweensOf(fill);
+                    gsap.to(fill,
+                      { y: toTop ? '-100%' : '100%', duration: 0.4, ease: "power3.out" }
+                    );
+                  }}
+                  onClick={(e) => {
+                    const btn = e.currentTarget;
+                    gsap.timeline()
+                      .to(btn, { scale: 0.95, duration: 0.1, ease: "power2.out" })
+                      .to(btn, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)", clearProps: "scale" });
+                    handleDetectPlants();
+                  }}
+                  disabled={isTranscribing || isDetecting || isQwenTranscribing}
+                  style={{ flex: 1, height: '38px', minWidth: 0, opacity: (isTranscribing || isDetecting || isQwenTranscribing) ? 0.9 : 1 }}
+                >
+                  <div className="glow-btn-fill"></div>
+                  <div className="glow-btn-content" style={{ fontSize: '11px', padding: '0 8px', gap: '6px' }}>
+                    {isDetecting ? <div className="loading-spinner" /> : <span>🌿</span>}
+                    <span style={{ whiteSpace: 'nowrap', fontWeight: 800 }}>{isDetecting ? 'YOLO...' : 'YOLO'}</span>
+                  </div>
+                </button>
+              </Tippy>
             </div>
 
             {(ocrResults.length > 0 || qwenResults.length > 0 || plantDetections.length > 0 || qwenThinking !== null || isQwenTranscribing) ? (

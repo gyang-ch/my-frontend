@@ -244,62 +244,76 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
 
       {/* Custom Floating Toolbar */}
       <div className="custom-osd-toolbar">
-        <div className="osd-btn-wrapper" title="Previous Page">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => {
-            if (osdRef.current && osdRef.current.currentPage() > 0) {
-              osdRef.current.goToPage(osdRef.current.currentPage() - 1);
-            }
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-        </div>
+        <Tippy content="Previous page" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => {
+              if (osdRef.current && osdRef.current.currentPage() > 0) {
+                osdRef.current.goToPage(osdRef.current.currentPage() - 1);
+              }
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Next Page">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => {
-            if (osdRef.current && tileSources && osdRef.current.currentPage() < tileSources.length - 1) {
-              osdRef.current.goToPage(osdRef.current.currentPage() + 1);
-            }
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-        </div>
+        <Tippy content="Next page" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => {
+              if (osdRef.current && tileSources && osdRef.current.currentPage() < tileSources.length - 1) {
+                osdRef.current.goToPage(osdRef.current.currentPage() + 1);
+              }
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Zoom In">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => osdRef.current?.viewport?.zoomBy(1.2)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-        </div>
+        <Tippy content="Zoom in" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => osdRef.current?.viewport?.zoomBy(1.2)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Zoom Out">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => osdRef.current?.viewport?.zoomBy(0.8)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-        </div>
+        <Tippy content="Zoom out" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => osdRef.current?.viewport?.zoomBy(0.8)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Reset View">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => osdRef.current?.viewport?.goHome()}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-          </button>
-        </div>
+        <Tippy content="Reset view" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => osdRef.current?.viewport?.goHome()}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Full Screen">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={() => osdRef.current?.setFullScreen(!osdRef.current?.isFullPage())}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-          </button>
-        </div>
+        <Tippy content="Full screen" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={() => osdRef.current?.setFullScreen(!osdRef.current?.isFullPage())}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </button>
+          </div>
+        </Tippy>
 
-        <div className="osd-btn-wrapper" title="Download Full Page">
-          <div className="osd-btn-glow"></div>
-          <button className="osd-btn" onClick={handleDownload}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          </button>
-        </div>
+        <Tippy content="Download page" placement="left" delay={0} animation={false}>
+          <div className="osd-btn-wrapper">
+            <div className="osd-btn-glow"></div>
+            <button className="osd-btn" onClick={handleDownload}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+          </div>
+        </Tippy>
       </div>
 
       <div ref={viewerRef} style={{ width: '100%', height: '100%' }} />
