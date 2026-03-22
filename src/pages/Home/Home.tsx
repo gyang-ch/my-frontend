@@ -47,7 +47,10 @@ export function HomePage() {
               className={`home-card home-card--${entry.to.replace('/', '')}`}
             >
               <div className="home-card-title">{entry.title}</div>
-              <div className="home-card-foot" aria-hidden="true">Open →</div>
+              <div className="home-card-foot" aria-hidden="true">
+                <span>Open</span>
+                <span className="home-card-arrow">→</span>
+              </div>
             </NavLink>
             <p className="home-entry-text">{entry.side}</p>
           </div>
