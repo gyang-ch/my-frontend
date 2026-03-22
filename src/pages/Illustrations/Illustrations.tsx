@@ -1,13 +1,11 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
 const illustrationsUrl = '/data/illustrations.public.jsonl'
 import { Paginator } from '../../components/Paginator'
-const IllustrationNetworkSection = lazy(
-  () => import('../IllustrationNetwork/IllustrationNetwork').then((m) => ({ default: m.IllustrationNetworkSection }))
-)
+import { IllustrationNetworkSection } from '../IllustrationNetwork/IllustrationNetwork'
 import './Illustrations.css'
 
 export const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
@@ -405,11 +403,7 @@ function LazyNetworkSection() {
 
   return (
     <div ref={sentinelRef}>
-      {shouldRender && (
-        <Suspense fallback={null}>
-          <IllustrationNetworkSection />
-        </Suspense>
-      )}
+      {shouldRender && <IllustrationNetworkSection />}
     </div>
   )
 }
