@@ -11,19 +11,19 @@ const entries = [
   {
     to: '/ai-hub',
     title: 'AI Hub',
-    side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities — analysing both textual and visual materials.',
+    side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities.',
     align: 'right',
   },
   {
     to: '/illustrations',
     title: 'Illustrations',
-    side: 'A YOLO model fine-tuned on 1,200 annotated images detects plant illustrations across the collection, transforming machine outputs into a curated visual dataset.',
+    side: 'Plant illustrations extracted and cropped from book page images by the YOLO model.',
     align: 'left',
   },
   {
     to: '/geography',
     title: 'Geographical Distribution',
-    side: 'Plant distributions are mapped using kepler.gl and globe.gl, situating the archive in space and engaging spatial humanities methods.',
+    side: 'Plant distributions are mapped using kepler.gl, situating the archive in space and engaging spatial humanities methods.',
     align: 'right',
   },
 ] as const
@@ -35,7 +35,7 @@ export function HomePage() {
         <p>
           PhytoVision explores the history of botany through digitised historical books,
           investigating how computer-assisted techniques can enhance the analysis of botanical
-          texts and images at large scale through AI models and IIIF.
+          texts and images at large scale through AI models and digital infrastructures.
         </p>
       </div>
 

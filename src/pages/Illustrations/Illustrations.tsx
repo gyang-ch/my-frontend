@@ -518,7 +518,7 @@ export function IllustrationsPage() {
       <div className="illus-header">
         <h2 className="illus-heading">Botanical Illustrations</h2>
         <p className="illus-subheading">
-          {totalCount.toLocaleString()} illustrations extracted from the manuscript collection.
+          {totalCount.toLocaleString()} illustrations extracted from the books.
           Click any image to inspect its source page.
         </p>
       </div>

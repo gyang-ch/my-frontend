@@ -1,7 +1,7 @@
 /* ── Methodology page ─────────────────────────────────── */
 
 .meth-page {
-  max-width: 740px;
+  max-width: 860px;
   margin: 0 auto;
   padding: 3rem 2rem 5rem;
   color: #1a1a1a;
@@ -31,7 +31,7 @@
 
 /* Body text */
 .meth-body p {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.85;
   color: #2c2c2c;
   margin: 0 0 1.5rem;
@@ -57,8 +57,8 @@
 }
 
 .meth-figure-img {
-  max-width: 100%;
-  width: 100%;
+  max-width: 78%;
+  width: 78%;
   border-radius: 6px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
   display: block;
@@ -71,6 +71,11 @@
   color: #666;
   font-style: italic;
   line-height: 1.5;
+}
+
+/* In-text citations */
+.meth-citation {
+  color: #0e7fe8;
 }
 
 /* References */
