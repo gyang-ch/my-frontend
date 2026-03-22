@@ -64,19 +64,14 @@ export interface IllustrationPhoto extends Photo {
 
 // ── Helpers ───────────────────────────────────────────────
 
-function getIIIFInfoUrl(iiifUrl: string): string {
-  // .../image/{id}/full/1000,/0/default.jpg  →  .../image/{id}/info.json
-  return iiifUrl.replace(/\/full\/.+$/, '/info.json')
-}
-
 // ── Simple OSD viewer with illustration bbox highlight ────
 
 function IllustrationViewer({
-  iiifInfoUrl,
+  imageUrl,
   bbox,
   pageWidth,
 }: {
-  iiifInfoUrl: string
+  imageUrl: string
   bbox: [number, number, number, number]
   /** Width of the thumbnail image that bbox_px coordinates are relative to. */
   pageWidth: number
@@ -92,7 +87,7 @@ function IllustrationViewer({
     const viewer = OpenSeadragon({
       element: containerRef.current,
       prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
-      tileSources: iiifInfoUrl,
+      tileSources: { type: 'image', url: imageUrl },
       crossOriginPolicy: 'Anonymous',
       showNavigationControl: false,
       showNavigator: false,
@@ -236,7 +231,7 @@ export function IllustrationPopup({
   onSelectNeighbor: (photo: IllustrationPhoto) => void
 }) {
   const r = photo.record
-  const iiifInfoUrl = getIIIFInfoUrl(r.page.iiif_url)
+  const imageUrl = r.page.iiif_url
 
   const [x1, y1, x2, y2] = r.illustration.bbox_px
   const cropSize = `${r.illustration.width} × ${r.illustration.height} px`
@@ -255,7 +250,7 @@ export function IllustrationPopup({
       <div className="illus-popup-viewer-col">
         <IllustrationViewer
           key={r.illustration_id}
-          iiifInfoUrl={iiifInfoUrl}
+          imageUrl={imageUrl}
           bbox={r.illustration.bbox_px}
           pageWidth={r.page.image_width}
         />
@@ -289,8 +284,10 @@ export function IllustrationPopup({
 
         {/* Badges */}
         <div className="illus-popup-badges">
-          <span className="illus-popup-badge illus-popup-badge--year">{r.book.year}</span>
-          {r.book.language.map((l) => (
+          {r.book.year && (
+            <span className="illus-popup-badge illus-popup-badge--year">{r.book.year}</span>
+          )}
+          {r.book.language.filter((l) => l).map((l) => (
             <span key={l} className="illus-popup-badge">{l}</span>
           ))}
           {r.book.category && (
