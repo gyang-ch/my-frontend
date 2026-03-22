@@ -66,6 +66,19 @@ export interface IllustrationPhoto extends Photo {
 
 // ── Simple OSD viewer with illustration bbox highlight ────
 
+/**
+ * Convert a IIIF Image API URL (any endpoint) to its info.json URL so OSD
+ * can use the tiled protocol instead of downloading the whole image at once.
+ * e.g. https://server/iiif/image/ID/full/1000,/0/default.jpg
+ *   →  https://server/iiif/image/ID/info.json
+ */
+function toIiifInfoUrl(url: string): string {
+  const idx = url.lastIndexOf('/full/')
+  if (idx !== -1) return url.slice(0, idx) + '/info.json'
+  if (url.endsWith('/info.json')) return url
+  return url
+}
+
 function IllustrationViewer({
   imageUrl,
   bbox,
@@ -87,7 +100,9 @@ function IllustrationViewer({
     const viewer = OpenSeadragon({
       element: containerRef.current,
       prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
-      tileSources: { type: 'image', url: imageUrl },
+      // Use IIIF tiled source so only the visible tiles are fetched.
+      // This turns a full-page JPEG download into progressive tile loading.
+      tileSources: toIiifInfoUrl(imageUrl),
       crossOriginPolicy: 'Anonymous',
       showNavigationControl: false,
       showNavigator: false,
