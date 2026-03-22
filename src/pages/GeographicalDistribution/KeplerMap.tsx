@@ -24,15 +24,16 @@ const suppressNotifications = () => (next: (a: unknown) => unknown) => (action: 
 
 const store = createStore(reducers, {}, applyMiddleware(taskMiddleware, suppressNotifications));
 
-const Map = ({ width }: { width: number }) => {
+type PlantPoint = { lat: number; lng: number; count: number };
+
+const Map = ({ width, plantPoints }: { width: number; plantPoints: PlantPoint[] }) => {
   const dispatch = useDispatch();
   // Vite exposes env vars to browser code only when prefixed with `VITE_`.
   const mapboxToken = (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined) || '';
 
   useEffect(() => {
-    fetch('/data/plant_points.json')
-      .then(res => res.json())
-      .then((plantPoints: { lat: number; lng: number; count: number }[]) => {
+    if (plantPoints.length === 0) return;
+
     const data = {
       fields: [
         { name: 'lat', format: '', type: 'real' },
@@ -72,11 +73,11 @@ const Map = ({ width }: { width: number }) => {
                     // ~80 km matches the ~1° pre-gridded cells, giving one bar per cell
                     worldUnitSize: 80,
                     colorRange: {
-                      name: 'Sunset',
+                      name: 'Inferno',
                       type: 'sequential',
                       category: 'Uber',
-                      // light yellow → orange → deep red: clearly visible on light basemap
-                      colors: ['#ffffb2', '#fecc5c', '#fd8d3c', '#f03b20', '#bd0026', '#5e0020']
+                      // deep purple → orange → bright yellow: maximum contrast on dark basemap
+                      colors: ['#420a68', '#932667', '#dd513a', '#fca50a', '#f0f921', '#ffffff']
                     },
                     coverage: 0.85,
                     sizeRange: [0, 500],
@@ -132,7 +133,7 @@ const Map = ({ width }: { width: number }) => {
             isSplit: false
           },
           mapStyle: {
-            styleType: 'light',
+            styleType: 'dark',
             topLayerGroups: {},
             visibleLayerGroups: {
               label: true,
@@ -147,14 +148,13 @@ const Map = ({ width }: { width: number }) => {
         }
       })
     );
-      });
-  }, [dispatch]);
+  }, [dispatch, plantPoints]);
 
   return (
     <div style={{ width: `${width}px`, height: '800px', position: 'relative' }} className="kepler-map-container">
       <style>{`
         /* Seadragon-style Kepler.gl Customization */
-        
+
         /* Side Panel Beautification */
         .kepler-map-container .side-panel__container {
           background-color: rgba(15, 23, 42, 0.85) !important;
@@ -178,13 +178,14 @@ const Map = ({ width }: { width: number }) => {
           width: 32px !important;
           height: 32px !important;
           border-radius: 50% !important;
-          background-color: #ffffff !important;
-          color: #334155 !important;
-          border: 1px solid #e2e8f0 !important;
+          background-color: rgba(15, 23, 42, 0.9) !important;
+          backdrop-filter: blur(8px) !important;
+          color: #94a3b8 !important;
+          border: 1px solid rgba(255, 255, 255, 0.12) !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
           cursor: pointer !important;
           margin: 0 !important;
@@ -227,10 +228,11 @@ const Map = ({ width }: { width: number }) => {
           align-items: center !important;
           justify-content: center !important;
           border-radius: 8px !important;
-          border: 1px solid #e2e8f0 !important;
-          background-color: rgba(255, 255, 255, 0.95) !important;
-          color: #334155 !important;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          background-color: rgba(15, 23, 42, 0.85) !important;
+          backdrop-filter: blur(8px) !important;
+          color: #94a3b8 !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
           transition: all 0.2s !important;
           cursor: pointer !important;
           padding: 0 !important;
@@ -242,7 +244,7 @@ const Map = ({ width }: { width: number }) => {
           color: #ffffff !important;
           border-color: #14b8a6 !important;
           transform: scale(1.05) !important;
-          box-shadow: 0 0 12px rgba(13, 148, 136, 0.4) !important;
+          box-shadow: 0 0 16px rgba(13, 148, 136, 0.5) !important;
         }
 
         .kepler-map-container .map-control-button:active {
@@ -260,14 +262,15 @@ const Map = ({ width }: { width: number }) => {
           display: none !important;
         }
 
-        /* Customize legend to match */
+        /* Customize legend to match dark theme */
         .kepler-map-container .map-control .map-legend {
-          background-color: rgba(255, 255, 255, 0.95) !important;
-          color: #334155 !important;
-          border: 1px solid #e2e8f0 !important;
+          background-color: rgba(15, 23, 42, 0.92) !important;
+          backdrop-filter: blur(12px) !important;
+          color: #e2e8f0 !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
           border-radius: 12px !important;
           padding: 16px !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
         }
       `}</style>
       {!mapboxToken && (
@@ -301,10 +304,10 @@ const Map = ({ width }: { width: number }) => {
   );
 };
 
-export const KeplerMap: React.FC<{ width: number }> = ({ width }) => {
+export const KeplerMap: React.FC<{ width: number; plantPoints: PlantPoint[] }> = ({ width, plantPoints }) => {
   return (
     <Provider store={store}>
-      <Map width={width} />
+      <Map width={width} plantPoints={plantPoints} />
     </Provider>
   );
 };
