@@ -14,7 +14,15 @@ const reducers = combineReducers({
   keplerGl: keplerGlReducer
 });
 
-const store = createStore(reducers, {}, applyMiddleware(taskMiddleware));
+// Drop kepler.gl notification toasts at the Redux level — the only reliable
+// fix because kepler.gl v3 uses styled-components with hashed class names,
+// so CSS selectors targeting "notification-panel" etc. never match.
+const suppressNotifications = () => (next: (a: unknown) => unknown) => (action: unknown) => {
+  if ((action as { type?: string }).type === '@@kepler.gl/ADD_NOTIFICATION') return;
+  return next(action);
+};
+
+const store = createStore(reducers, {}, applyMiddleware(taskMiddleware, suppressNotifications));
 
 const Map = ({ width }: { width: number }) => {
   const dispatch = useDispatch();
@@ -53,50 +61,28 @@ const Map = ({ width }: { width: number }) => {
             filters: [],
             layers: [
               {
-                id: 'heatmap',
-                type: 'heatmap',
-                config: {
-                  dataId: 'plant_data',
-                  label: 'Density Heatmap',
-                  isVisible: true,
-                  visConfig: {
-                    opacity: 0.85,
-                    colorRange: {
-                      name: 'Magenta',
-                      type: 'sequential',
-                      category: 'Uber',
-                      colors: ['#310230', '#790971', '#B010A5', '#D440D0', '#E987E8', '#FFCFFF']
-                    },
-                    radius: 25
-                  }
-                },
-                visualChannels: {
-                  weightField: { name: 'count', type: 'integer' },
-                  weightScale: 'linear'
-                }
-              },
-              {
                 id: 'hexagon-bars',
                 type: 'hexagon',
                 config: {
                   dataId: 'plant_data',
-                  label: 'Distribution Bars',
+                  label: 'Illustration Count',
                   isVisible: true,
                   visConfig: {
-                    opacity: 0.8,
-                    worldUnitSize: 50,
-                    resolution: 8,
+                    opacity: 0.9,
+                    // ~80 km matches the ~1° pre-gridded cells, giving one bar per cell
+                    worldUnitSize: 80,
                     colorRange: {
-                      name: 'Magenta',
+                      name: 'Sunset',
                       type: 'sequential',
                       category: 'Uber',
-                      colors: ['#310230', '#790971', '#B010A5', '#D440D0', '#E987E8', '#FFCFFF']
+                      // light yellow → orange → deep red: clearly visible on light basemap
+                      colors: ['#ffffb2', '#fecc5c', '#fd8d3c', '#f03b20', '#bd0026', '#5e0020']
                     },
-                    coverage: 1,
+                    coverage: 0.85,
                     sizeRange: [0, 500],
                     percentile: [0, 100],
                     elevationPercentile: [0, 100],
-                    elevationScale: 100,
+                    elevationScale: 10,
                     enable3d: true,
                     fixedRadius: false
                   }
@@ -139,14 +125,14 @@ const Map = ({ width }: { width: number }) => {
           mapState: {
             bearing: 0,
             dragRotate: true,
-            latitude: 20,
-            longitude: 0,
-            pitch: 40,
-            zoom: 1.5,
+            latitude: 48,
+            longitude: 10,
+            pitch: 50,
+            zoom: 3.8,
             isSplit: false
           },
           mapStyle: {
-            styleType: 'dark',
+            styleType: 'light',
             topLayerGroups: {},
             visibleLayerGroups: {
               label: true,
@@ -271,14 +257,6 @@ const Map = ({ width }: { width: number }) => {
 
         /* Hide the default tooltip in buttons if any */
         .kepler-map-container .map-control-button::before {
-          display: none !important;
-        }
-
-        /* Hide Kepler.gl notification popups */
-        .kepler-map-container .notification-panel,
-        .kepler-map-container .notification-item,
-        .kepler-map-container [class*="notification-panel"],
-        .kepler-map-container [class*="NotificationPanel"] {
           display: none !important;
         }
 

@@ -1,16 +1,19 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
 const illustrationsUrl = '/data/illustrations.public.jsonl'
 import { Paginator } from '../../components/Paginator'
+const IllustrationNetworkSection = lazy(
+  () => import('../IllustrationNetwork/IllustrationNetwork').then((m) => ({ default: m.IllustrationNetworkSection }))
+)
 import './Illustrations.css'
 
-const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
-const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
+export const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
+export const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
 
-interface IllustrationRecord {
+export interface IllustrationRecord {
   illustration_id: string
   book: {
     book_id: string
@@ -50,10 +53,14 @@ interface IllustrationRecord {
     human_verified: boolean
     verification_notes: string
   }
+  cluster: {
+    algorithm: string
+    cluster_id: number
+  }
   neighbors: string[]
 }
 
-interface IllustrationPhoto extends Photo {
+export interface IllustrationPhoto extends Photo {
   record: IllustrationRecord
 }
 
@@ -217,7 +224,7 @@ function MetaRow({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-function IllustrationPopup({
+export function IllustrationPopup({
   photo,
   onClose,
   popupRef,
@@ -374,6 +381,39 @@ function IllustrationPopup({
   )
 }
 
+// ── Lazy network section (only mounts when scrolled into view) ──
+
+function LazyNetworkSection() {
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const [shouldRender, setShouldRender] = useState(false)
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '300px' }, // start loading 300 px before it enters the viewport
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={sentinelRef}>
+      {shouldRender && (
+        <Suspense fallback={null}>
+          <IllustrationNetworkSection />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────
 
 const ILLUS_PER_PAGE = 100
@@ -439,6 +479,8 @@ export function IllustrationsPage() {
       if (popupRef.current?.contains(target)) return
       // Keep open if click is on a photo (its own onClick will handle toggling)
       if ((target as Element).closest?.('.illus-photo-wrapper')) return
+      // Keep open if click is inside the network graph (sigma handles its own events)
+      if ((target as Element).closest?.('.illus-network-sigma')) return
       setSelectedPhoto(null)
     }
     window.addEventListener('keydown', onKey)
@@ -517,6 +559,8 @@ export function IllustrationsPage() {
       />
 
       <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+      <LazyNetworkSection />
 
       {selectedPhoto && (
         <IllustrationPopup
