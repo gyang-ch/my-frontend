@@ -124,8 +124,8 @@ export const GeographicalDistribution: React.FC = () => {
           <KeplerMap width={width} plantPoints={plantPointData} />
         </div>
 
-        {/* 3D Globe Section */}
-        <div
+        {/* 3D Globe Section — deferred until data is ready so Kepler gets priority */}
+        {hexData.length > 0 && <div
           ref={containerRef}
           style={{
             width: '100%',
@@ -207,7 +207,7 @@ export const GeographicalDistribution: React.FC = () => {
               setTooltipCount(Math.round(hex.sumWeight ?? 0));
             }}
           />
-        </div>
+        </div>}
 
       </div>
     </div>

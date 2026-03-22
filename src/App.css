@@ -461,7 +461,7 @@
 
 .section-heading {
   font-family: "EB Garamond", Georgia, serif;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.02em;
 }
 
@@ -502,7 +502,10 @@
 }
 
 .period-title {
+  font-family: "EB Garamond", Georgia, serif;
   font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   margin-bottom: 2rem;
   border-left: 4px solid #3182ce;
   padding-left: 1rem;

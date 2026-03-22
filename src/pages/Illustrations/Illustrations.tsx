@@ -422,7 +422,7 @@ function LazyNetworkSection() {
 
 // ── Page ──────────────────────────────────────────────────
 
-const ILLUS_PER_PAGE = 100
+const ILLUS_PER_PAGE = 70
 
 export function IllustrationsPage() {
   const [dataLoading, setDataLoading] = useState(true)
