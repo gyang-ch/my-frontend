@@ -9,7 +9,8 @@
 /* Specific component overrides for white theme */
 .white-theme-mode .ai-hub-title {
   color: #000000 !important;
-  font-family: "Aptos", "Segoe UI", sans-serif !important;
+  font-family: "EB Garamond", Georgia, serif !important;
+  font-weight: 500 !important;
 }
 
 .white-theme-mode .section-heading,
