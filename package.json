@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/downloadManifests.js",
+    "prebuild": "node scripts/downloadManifests.js && node scripts/generateHeroTiles.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
