@@ -155,7 +155,8 @@ function App() {
       </main>
 
       <footer className="site-footer">
-        <p>© 2026 Guang Yang · PhytoVison</p>
+        <p>© 2026 Guang Yang</p>
+        <p>DH6014 · University College Cork</p>
       </footer>
     </div>
   )
