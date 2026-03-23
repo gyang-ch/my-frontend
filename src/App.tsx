@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import './App.css'
+import { HeroMosaic } from './components/HeroMosaic'
 
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
@@ -94,7 +95,7 @@ function App() {
       </a>
 
       <header className="hero" ref={heroSectionRef}>
-        <div className="hero-background"></div>
+        <HeroMosaic />
         <div className="hero-content" ref={heroTextRef}>
           <h1>
             Computational Analysis of <br />

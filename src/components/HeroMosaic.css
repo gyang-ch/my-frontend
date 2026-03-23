@@ -1,0 +1,39 @@
+.hero-mosaic {
+  position: absolute;
+  inset: -5%;
+  z-index: 0;
+  pointer-events: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+
+  background: #060e1c;
+  filter: blur(2px) brightness(0.72) saturate(0.55);
+  overflow: hidden;
+}
+
+/* ── Each row ─────────────────────────────────────────────── */
+
+.hero-mosaic-row {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+/* Odd rows shift left by exactly half a tile unit (tile + gap) / 2
+   to produce a true brick-pattern stagger.                   */
+.hero-mosaic-row--offset {
+  margin-left: calc((130px + 1px) / -2);
+}
+
+/* ── Individual tile ──────────────────────────────────────── */
+
+.hero-mosaic-img {
+  flex: 0 0 130px;
+  height: 148px;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
