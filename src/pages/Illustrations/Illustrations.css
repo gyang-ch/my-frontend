@@ -497,7 +497,7 @@
   cursor: pointer;
   border-radius: 5px;
   overflow: hidden;
-  height: 76px;
+  height: 96px;
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.15s, transform 0.15s;
 }
@@ -508,7 +508,7 @@
 }
 
 .illus-neighbor-thumb img {
-  height: 76px;
+  height: 96px;
   width: auto;
   display: block;
 }
