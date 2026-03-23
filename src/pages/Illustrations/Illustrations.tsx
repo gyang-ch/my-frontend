@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import gsap from 'gsap'
 import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
@@ -248,6 +249,80 @@ export function IllustrationPopup({
   const r = photo.record
   const imageUrl = r.page.iiif_url
 
+  // GSAP entrance – runs once per mount (component is keyed by illustration_id)
+  useEffect(() => {
+    const el = popupRef.current
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const tl = gsap.timeline()
+
+    // 1 – Card slides up from below
+    tl.fromTo(
+      el,
+      { opacity: 0, y: 32, scale: 0.96 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.52, ease: 'power3.out', clearProps: 'transform' },
+    )
+
+    // 2 – Viewer column fades in from the left (concurrent)
+    const viewerCol = el.querySelector('.illus-popup-viewer-col')
+    if (viewerCol) {
+      tl.fromTo(
+        viewerCol,
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.40',
+      )
+    }
+
+    // 3 – Header + badges stagger up
+    const headerEls = el.querySelectorAll('.illus-popup-header, .illus-popup-badges')
+    if (headerEls.length) {
+      tl.fromTo(
+        headerEls,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: 0.07, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.30',
+      )
+    }
+
+    // 4 – Meta rows / labels / dividers stagger in
+    const metaEls = el.querySelectorAll(
+      '.illus-popup-section-label, .illus-popup-divider, .illus-popup-meta-row, .illus-popup-caption, .illus-popup-notes, .illus-popup-footer',
+    )
+    if (metaEls.length) {
+      tl.fromTo(
+        metaEls,
+        { opacity: 0, y: 5 },
+        { opacity: 1, y: 0, duration: 0.25, stagger: 0.022, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.20',
+      )
+    }
+
+    // 5 – Neighbor strip slides up last
+    const neighbors = el.querySelector('.illus-popup-neighbors')
+    if (neighbors) {
+      tl.fromTo(
+        neighbors,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.38, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.08',
+      )
+      // Individual neighbor thumbs stagger in
+      const thumbs = neighbors.querySelectorAll('.illus-neighbor-thumb')
+      if (thumbs.length) {
+        tl.fromTo(
+          thumbs,
+          { opacity: 0, scale: 0.88 },
+          { opacity: 1, scale: 1, duration: 0.28, stagger: 0.04, ease: 'back.out(1.4)', clearProps: 'transform' },
+          '-=0.28',
+        )
+      }
+    }
+
+    return () => { tl.kill() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const [x1, y1, x2, y2] = r.illustration.bbox_px
   const cropSize = `${r.illustration.width} × ${r.illustration.height} px`
   const pageSize = `${r.page.image_width} × ${r.page.image_height} px`
@@ -381,7 +456,7 @@ export function IllustrationPopup({
                 onClick={() => onSelectNeighbor(np)}
                 title={np.record.book.title}
               >
-                <img src={np.src} alt="" loading="lazy" />
+                <img src={np.src} alt="" loading="eager" />
               </button>
             ))}
           </div>
@@ -499,6 +574,20 @@ export function IllustrationsPage() {
 
   const closePopup = () => setSelectedPhoto(null)
 
+  // Preload neighbor thumbnails immediately on selection so they're in the
+  // browser cache before the popup's GSAP entrance animation finishes.
+  const handleSelectPhoto = useCallback((photo: IllustrationPhoto) => {
+    const neighborIds = photo.record.neighbors ?? []
+    neighborIds.forEach((id) => {
+      const np = photoMapRef.current.get(id)
+      if (np) {
+        const img = new window.Image()
+        img.src = np.src
+      }
+    })
+    setSelectedPhoto(photo)
+  }, [])
+
   const totalPages = Math.max(1, Math.ceil(totalCount / ILLUS_PER_PAGE))
 
   const handlePageChange = (page: number) => {
@@ -554,7 +643,7 @@ export function IllustrationsPage() {
             className: `illus-photo-wrapper${selectedPhoto?.key === photo.key ? ' illus-photo-selected' : ''}`,
             onClick: (e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation()
-              setSelectedPhoto(photo)
+              handleSelectPhoto(photo)
             },
           }),
           image: {
@@ -570,11 +659,12 @@ export function IllustrationsPage() {
 
       {selectedPhoto && (
         <IllustrationPopup
+          key={selectedPhoto.record.illustration_id}
           photo={selectedPhoto}
           onClose={closePopup}
           popupRef={popupRef}
           photoMap={photoMapRef.current}
-          onSelectNeighbor={setSelectedPhoto}
+          onSelectNeighbor={handleSelectPhoto}
         />
       )}
     </div>
