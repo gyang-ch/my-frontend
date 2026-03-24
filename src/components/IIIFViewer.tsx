@@ -48,12 +48,18 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
 
   useEffect(() => {
     if (viewerRef.current && !osdRef.current) {
+      // For Azure blob simple-image sources (type:'image'), use the HTML drawer so
+      // cross-origin images are rendered via CSS background-image instead of WebGL/canvas,
+      // avoiding tainted-canvas errors when crossOriginPolicy is false.
+      const isSimpleImageSources = Array.isArray(tileSources) && tileSources[0]?.type === 'image';
+
       const viewer = OpenSeadragon({
         element: viewerRef.current,
         prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
         tileSources: tileSources,
         initialPage: initialPage,
         crossOriginPolicy: false,
+        ...(isSimpleImageSources && { drawer: 'html' }),
         showNavigationControl: false,
         showSequenceControl: false,
         showNavigator: true,
@@ -111,18 +117,24 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
     
     // Attempt to get the source URL
     const currentSource = Array.isArray(tileSources) ? tileSources[pageIndex] : tileSources;
-    
-    let iiifBaseUrl = '';
-    if (typeof currentSource === 'string') {
-      iiifBaseUrl = currentSource.replace('/info.json', '');
-    } else if (currentSource && (currentSource['@id'] || currentSource.id)) {
-      iiifBaseUrl = (currentSource['@id'] || currentSource.id).replace('/info.json', '');
+
+    let downloadUrl = '';
+    if (currentSource && currentSource.type === 'image') {
+      // Azure blob simple image — download directly
+      downloadUrl = currentSource.url;
+    } else {
+      let iiifBaseUrl = '';
+      if (typeof currentSource === 'string') {
+        iiifBaseUrl = currentSource.replace('/info.json', '');
+      } else if (currentSource && (currentSource['@id'] || currentSource.id)) {
+        iiifBaseUrl = (currentSource['@id'] || currentSource.id).replace('/info.json', '');
+      }
+      if (iiifBaseUrl) {
+        downloadUrl = `${iiifBaseUrl}/full/max/0/default.jpg`;
+      }
     }
 
-    if (iiifBaseUrl) {
-      // Use 'max' or 'full' for the full size image
-      const downloadUrl = `${iiifBaseUrl}/full/max/0/default.jpg`;
-      
+    if (downloadUrl) {
       try {
         const response = await fetch(downloadUrl);
         const blob = await response.blob();

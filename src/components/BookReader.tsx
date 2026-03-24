@@ -81,6 +81,17 @@ const ThumbnailImage: React.FC<{ src: string; isSelected: boolean; isNearSelecte
   );
 };
 
+const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string;
+const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string;
+
+/** Extract the image URL from a tileSource entry (string info.json URL or Azure blob object). */
+function getTileSourceImageUrl(source: any, iiifSize = '1000,'): string {
+  if (source && source.type === 'image') return source.url;
+  if (typeof source === 'string') return source.replace('info.json', `full/${iiifSize}/0/default.jpg`);
+  const id = source?.['@id'] || source?.id || '';
+  return id.replace('info.json', `full/${iiifSize}/0/default.jpg`);
+}
+
 export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const API_BASE_URL = (
     (window as any).APP_CONFIG?.API_URL ||
@@ -236,7 +247,24 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         const manifest = await response.json();
         
         const sources: any[] = [];
-        if (manifest.sequences && manifest.sequences[0].canvases) {
+
+        // For RHS/libnova books, the IIIF server blocks cross-origin requests.
+        // Use Azure blob storage page images instead, looked up by libnova image ID.
+        const manifestId: string = manifest.id || manifest['@id'] || '';
+        const isRhsManifest = manifestId.includes('libnova.com');
+
+        if (isRhsManifest) {
+          // The blob book_id is hardcoded in BookRecord.blobBookId (books.ts).
+          // Build sequential page paths for all canvases in the manifest.
+          const blobBookId = book.blobBookId ?? '';
+          const canvases = manifest.sequences?.[0]?.canvases || manifest.items || [];
+          if (blobBookId && canvases.length > 0) {
+            canvases.forEach((_: any, i: number) => {
+              const pagePath = `book_pages/${blobBookId}/page_${String(i + 1).padStart(3, '0')}.jpg`;
+              sources.push({ type: 'image', url: `${AZURE_BASE}/${pagePath}?${AZURE_SAS}` });
+            });
+          }
+        } else if (manifest.sequences && manifest.sequences[0].canvases) {
           manifest.sequences[0].canvases.forEach((canvas: any) => {
             const image = canvas.images[0];
             const service = image.resource.service;
@@ -424,15 +452,14 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         modelLang = "Chinese";
       }
 
-      const infoUrl = tileSources[selectedPageIndex];
-      const imageUrl = infoUrl.replace('info.json', 'full/1000,/0/default.jpg');
-      
+      const imageUrl = getTileSourceImageUrl(tileSources[selectedPageIndex]);
+
       setOcrDebug({
         status: "Processing...",
         requestedUrl: imageUrl,
         lang: modelLang,
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/api/process-iiif?url=${encodeURIComponent(imageUrl)}&lang=${modelLang}`);
       const result = await response.json();
       
@@ -475,9 +502,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       setTranslatedText(null);
       setCurrentOcrUrl(null);
       
-      const infoUrl = tileSources[selectedPageIndex];
-      const imageUrl = infoUrl.replace('info.json', 'full/1000,/0/default.jpg');
-      
+      const tileSource = tileSources[selectedPageIndex];
+      const imageUrl = getTileSourceImageUrl(tileSource);
+
       setOcrDebug({
         status: "Processing Qwen (Frontend)...",
         requestedUrl: imageUrl,
@@ -486,13 +513,15 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
 
       let originalWidth = 1000;
       let originalHeight = 1000;
-      try {
-        const infoRes = await fetch(infoUrl);
-        const infoData = await infoRes.json();
-        if (infoData.width) originalWidth = infoData.width;
-        if (infoData.height) originalHeight = infoData.height;
-      } catch (e) {
-        console.warn("Could not fetch info.json", e);
+      if (typeof tileSource === 'string') {
+        try {
+          const infoRes = await fetch(tileSource);
+          const infoData = await infoRes.json();
+          if (infoData.width) originalWidth = infoData.width;
+          if (infoData.height) originalHeight = infoData.height;
+        } catch (e) {
+          console.warn("Could not fetch info.json", e);
+        }
       }
 
       const langCode = bookLangToCode(book.language || []);
@@ -634,9 +663,8 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       setPlantDetections([]);
       setCharacterBoxes([]);
       setOcrDebug(null);
-      const infoUrl = tileSources[selectedPageIndex];
-      const imageUrl = infoUrl.replace('info.json', 'full/2000,/0/default.jpg');
-      
+      const imageUrl = getTileSourceImageUrl(tileSources[selectedPageIndex], '2000,');
+
       const response = await fetch(`${API_BASE_URL}/api/detect-plants?url=${encodeURIComponent(imageUrl)}`);
       const result = await response.json();
       
@@ -1095,8 +1123,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
               <div className="thumbnails-row custom-scrollbar" ref={thumbnailsRowRef}>
                 {tileSources.map((source, index) => {
                   const isSelected = selectedPageIndex === index;
-                  const iiifUrl = source['@id'] || source.id || (typeof source === 'string' ? source : '');
-                  const thumbUrl = iiifUrl.replace('/info.json', '/full/200,/0/default.jpg');
+                  const thumbUrl = (source && source.type === 'image')
+                    ? source.url
+                    : (source['@id'] || source.id || (typeof source === 'string' ? source : '')).replace('/info.json', '/full/200,/0/default.jpg');
                   
                   return (
                     <button

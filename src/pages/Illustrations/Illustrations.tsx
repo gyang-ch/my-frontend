@@ -29,6 +29,7 @@ export interface IllustrationRecord {
     page_number: number
     page_index: number
     iiif_url: string
+    page_image?: string
     image_width: number
     image_height: number
   }
@@ -84,11 +85,13 @@ function IllustrationViewer({
   imageUrl,
   bbox,
   pageWidth,
+  useSimpleImage = false,
 }: {
   imageUrl: string
   bbox: [number, number, number, number]
   /** Width of the thumbnail image that bbox_px coordinates are relative to. */
   pageWidth: number
+  useSimpleImage?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const osdRef = useRef<OpenSeadragon.Viewer | null>(null)
@@ -102,9 +105,12 @@ function IllustrationViewer({
       element: containerRef.current,
       prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
       // Use IIIF tiled source so only the visible tiles are fetched.
-      // This turns a full-page JPEG download into progressive tile loading.
-      tileSources: toIiifInfoUrl(imageUrl),
-      crossOriginPolicy: 'Anonymous',
+      // For RHS/libnova books, fall back to a plain Azure blob image instead.
+      // Azure blob is loaded without CORS (crossOriginPolicy: false) and rendered
+      // via the HTML drawer (CSS background-image) to avoid tainted-canvas issues.
+      tileSources: useSimpleImage ? { type: 'image', url: imageUrl } : toIiifInfoUrl(imageUrl),
+      crossOriginPolicy: useSimpleImage ? false : 'Anonymous',
+      ...(useSimpleImage && { drawer: 'html' }),
       showNavigationControl: false,
       showNavigator: false,
       defaultZoomLevel: 0,
@@ -247,7 +253,10 @@ export function IllustrationPopup({
   onSelectNeighbor: (photo: IllustrationPhoto) => void
 }) {
   const r = photo.record
-  const imageUrl = r.page.iiif_url
+  const isRhsBook = r.page.iiif_url.includes('libnova.com')
+  const imageUrl = (isRhsBook && r.page.page_image)
+    ? `${AZURE_BASE}/${r.page.page_image}?${AZURE_SAS}`
+    : r.page.iiif_url
 
   // GSAP entrance – runs once per mount (component is keyed by illustration_id)
   useEffect(() => {
@@ -343,6 +352,7 @@ export function IllustrationPopup({
           imageUrl={imageUrl}
           bbox={r.illustration.bbox_px}
           pageWidth={r.page.image_width}
+          useSimpleImage={isRhsBook && !!r.page.page_image}
         />
       </div>
 

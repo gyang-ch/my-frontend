@@ -25,6 +25,10 @@ export interface BookRecord {
   illustrationCount?: number; // e.g., 289 (from Bodleian's metadata)
 
   logoUrl?: string;           // Museum logo
+
+  /** Azure blob storage book folder ID for RHS/libnova books.
+   *  When set, the AI Hub viewer loads pages from Azure instead of the IIIF server. */
+  blobBookId?: string;
 }
 
 const publicManifestUrl = (fileName: string) =>
@@ -224,7 +228,8 @@ export const bookData: BookRecord[] = [
     authors: ["Blackwell, Elizabeth (c1700-1758)"],
     shelfmark: "615.3 Bla",
     hasIllustrations: true,
-    illustrationCount: 500
+    illustrationCount: 500,
+    blobBookId: "52114",
   },
   {
     id: "2002046",
@@ -1906,6 +1911,7 @@ export const bookData: BookRecord[] = [
     shelfmark: "581 Aly",
     hasIllustrations: true,
     illustrationCount: 103,
+    blobBookId: "8c37eed9edbb2458",
   },
 
   // ── f6: RHS Lindley Library, Curious Herbal Vol. 2 ───────
@@ -1930,6 +1936,7 @@ export const bookData: BookRecord[] = [
     shelfmark: "615.3 Bla",
     hasIllustrations: true,
     illustrationCount: 500,
+    blobBookId: "be9be1cfaa5b3d01",
   },
 
   // ── f7: RHS Lindley Library, Herbarum arborum ────────────
@@ -1953,6 +1960,7 @@ export const bookData: BookRecord[] = [
     authors: ["Unknown"],
     shelfmark: "945 Her",
     hasIllustrations: true,
+    blobBookId: "b5755357a9f49811",
   },
 
   // ── f8: Leiden University Libraries, VLQ 9 ───────────────
