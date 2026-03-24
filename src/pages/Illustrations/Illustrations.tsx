@@ -245,18 +245,54 @@ export function IllustrationPopup({
   popupRef,
   photoMap,
   onSelectNeighbor,
+  onRegisterClose,
 }: {
   photo: IllustrationPhoto
   onClose: () => void
   popupRef: React.RefObject<HTMLDivElement | null>
   photoMap: Map<string, IllustrationPhoto>
   onSelectNeighbor: (photo: IllustrationPhoto) => void
+  onRegisterClose?: (fn: () => void) => (() => void) | void
 }) {
   const r = photo.record
   const isRhsBook = r.page.iiif_url.includes('libnova.com')
   const imageUrl = (isRhsBook && r.page.page_image)
     ? `${AZURE_BASE}/${r.page.page_image}?${AZURE_SAS}`
     : r.page.iiif_url
+
+  // Track mount status so the exit-animation onComplete never calls onClose
+  // after the popup has already been replaced by a neighbour selection.
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
+
+  // Animated close – plays exit tween, then unmounts.
+  const animatedClose = useCallback(() => {
+    const el = popupRef.current
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClose()
+      return
+    }
+    // Block further interaction while animating out
+    el.style.pointerEvents = 'none'
+    gsap.to(el, {
+      opacity: 0,
+      y: 20,
+      scale: 0.96,
+      duration: 0.28,
+      ease: 'power3.in',
+      onComplete: () => { if (isMountedRef.current) onClose() },
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose])
+
+  // Expose animatedClose to the parent so outside-click / Escape use it too.
+  // The parent returns a cleanup that clears the ref, so stale closures from
+  // a previous popup (replaced by a neighbour) never fire on the new popup.
+  useEffect(() => {
+    const cleanup = onRegisterClose?.(animatedClose)
+    return typeof cleanup === 'function' ? cleanup : undefined
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animatedClose])
 
   // GSAP entrance – runs once per mount (component is keyed by illustration_id)
   useEffect(() => {
@@ -359,7 +395,7 @@ export function IllustrationPopup({
       {/* ── Metadata column ── */}
       <div className="illus-popup-meta-col">
         {/* Close button */}
-        <button className="illus-popup-close" onClick={onClose} title="Close (Esc)">
+        <button className="illus-popup-close" onClick={animatedClose} title="Close (Esc)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -520,6 +556,8 @@ export function IllustrationsPage() {
   const photoMapRef = useRef<Map<string, IllustrationPhoto>>(new Map())
   const popupRef = useRef<HTMLDivElement>(null)
   const gridTopRef = useRef<HTMLDivElement>(null)
+  // Holds the popup's animatedClose so outside-click / Escape animate out instead of snap-closing.
+  const closeCallbackRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     fetch(illustrationsUrl)
@@ -560,10 +598,16 @@ export function IllustrationsPage() {
       })
   }, [])
 
+  // Route all close triggers through the popup's animatedClose when it's registered.
+  const closePopup = useCallback(() => {
+    if (closeCallbackRef.current) closeCallbackRef.current()
+    else setSelectedPhoto(null)
+  }, [])
+
   // Close popup on Escape or click outside the card / illustrations
   useEffect(() => {
     if (!selectedPhoto) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedPhoto(null) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closePopup() }
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as Node
       // Keep open if click is inside the popup card
@@ -572,7 +616,7 @@ export function IllustrationsPage() {
       if ((target as Element).closest?.('.illus-photo-wrapper')) return
       // Keep open if click is inside the network graph (sigma handles its own events)
       if ((target as Element).closest?.('.illus-network-sigma')) return
-      setSelectedPhoto(null)
+      closePopup()
     }
     window.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onPointerDown)
@@ -580,9 +624,7 @@ export function IllustrationsPage() {
       window.removeEventListener('keydown', onKey)
       document.removeEventListener('pointerdown', onPointerDown)
     }
-  }, [selectedPhoto])
-
-  const closePopup = () => setSelectedPhoto(null)
+  }, [selectedPhoto, closePopup])
 
   // Preload neighbor thumbnails immediately on selection so they're in the
   // browser cache before the popup's GSAP entrance animation finishes.
@@ -602,7 +644,7 @@ export function IllustrationsPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    setSelectedPhoto(null)
+    closePopup()
     gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -671,10 +713,14 @@ export function IllustrationsPage() {
         <IllustrationPopup
           key={selectedPhoto.record.illustration_id}
           photo={selectedPhoto}
-          onClose={closePopup}
+          onClose={() => setSelectedPhoto(null)}
           popupRef={popupRef}
           photoMap={photoMapRef.current}
           onSelectNeighbor={handleSelectPhoto}
+          onRegisterClose={(fn) => {
+            closeCallbackRef.current = fn
+            return () => { closeCallbackRef.current = null }
+          }}
         />
       )}
     </div>
