@@ -33,6 +33,12 @@ const navItems = [
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
+  const apiBaseUrl = (
+    (window as any).APP_CONFIG?.API_URL ||
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'https://gyang-ch--image-api.modal.run'
+  ).replace(/\/+$/, '')
 
   const heroTextRef = useRef<HTMLDivElement>(null)
   const heroSectionRef = useRef<HTMLElement>(null)
@@ -87,6 +93,20 @@ function App() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetch(`${apiBaseUrl}/healthz`, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller.signal,
+    }).catch(() => {
+      // Ignore warm-up failures. The first real backend request can still proceed normally.
+    })
+
+    return () => controller.abort()
+  }, [apiBaseUrl])
 
   return (
     <div className="app-container">

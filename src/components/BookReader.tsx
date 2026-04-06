@@ -97,8 +97,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
     (window as any).APP_CONFIG?.API_URL ||
     import.meta.env.VITE_API_URL ||
     import.meta.env.VITE_API_BASE_URL ||
-    'http://localhost:8000'
+    'https://gyang-ch--image-api.modal.run'
   ).replace(/\/+$/, '');
+  const PREDICT_URL = `${API_BASE_URL}/predict`;
   const backBtnRef = useRef<HTMLButtonElement>(null);
   const [isBackFloating, setIsBackFloating] = useState(false);
 
@@ -460,7 +461,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         lang: modelLang,
       });
 
-      const response = await fetch(`${API_BASE_URL}/api/process-iiif?url=${encodeURIComponent(imageUrl)}&lang=${modelLang}`);
+      const response = await fetch(`${PREDICT_URL}?task=iiif&url=${encodeURIComponent(imageUrl)}&lang=${encodeURIComponent(modelLang)}`);
       const result = await response.json();
       
       if (result.status === 'success') {
@@ -665,7 +666,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       setOcrDebug(null);
       const imageUrl = getTileSourceImageUrl(tileSources[selectedPageIndex], '2000,');
 
-      const response = await fetch(`${API_BASE_URL}/api/detect-plants?url=${encodeURIComponent(imageUrl)}`);
+      const response = await fetch(`${PREDICT_URL}?task=plants&url=${encodeURIComponent(imageUrl)}`);
       const result = await response.json();
       
       if (result.status === 'success') {
