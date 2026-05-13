@@ -39,14 +39,14 @@
   hyphens: auto;
 }
 
-.meth-body a {
+.meth-body a:not(.flip-link) {
   color: #3a7d44;
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
 }
 
-.meth-body a:hover {
+.meth-body a:not(.flip-link):hover {
   color: #2b5e33;
 }
 
