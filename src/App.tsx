@@ -34,12 +34,12 @@ const navItems = [
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  const apiBaseUrl = (
-    (window as any).APP_CONFIG?.API_URL ||
-    import.meta.env.VITE_API_URL ||
-    import.meta.env.VITE_API_BASE_URL ||
-    'https://gyang-ch--image-api.modal.run'
-  ).replace(/\/+$/, '')
+  // const apiBaseUrl = (
+  //   (window as any).APP_CONFIG?.API_URL ||
+  //   import.meta.env.VITE_API_URL ||
+  //   import.meta.env.VITE_API_BASE_URL ||
+  //   'https://gyang-ch--image-api.modal.run'
+  // ).replace(/\/+$/, '')
 
   const heroTextRef = useRef<HTMLDivElement>(null)
   const heroSectionRef = useRef<HTMLElement>(null)
