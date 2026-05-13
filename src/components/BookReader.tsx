@@ -538,7 +538,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen3.5-397B-A17B",
+          model: "google/gemma-4-31B-it",
           messages: [
             {
               role: "user",

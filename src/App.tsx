@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import './App.css'
@@ -94,19 +95,19 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    const controller = new AbortController()
+  // useEffect(() => {
+  //   const controller = new AbortController()
 
-    fetch(`${apiBaseUrl}/healthz`, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: controller.signal,
-    }).catch(() => {
-      // Ignore warm-up failures. The first real backend request can still proceed normally.
-    })
+  //   fetch(`${apiBaseUrl}/healthz`, {
+  //     method: 'GET',
+  //     cache: 'no-store',
+  //     signal: controller.signal,
+  //   }).catch(() => {
+  //     // Ignore warm-up failures. The first real backend request can still proceed normally.
+  //   })
 
-    return () => controller.abort()
-  }, [apiBaseUrl])
+  //   return () => controller.abort()
+  // }, [apiBaseUrl])
 
   return (
     <div className="app-container">
@@ -177,6 +178,8 @@ function App() {
       <footer className="site-footer">
         <p>© 2026 Guang Yang • University College Cork</p>
       </footer>
+
+      <Analytics />
     </div>
   )
 }
