@@ -1,4 +1,7 @@
-/* Apply white theme to specified pages */
+/* ── White-theme override for the <main> container ──────────────────────────
+   These !important rules are still needed: App.css sets dark-mode colors on
+   .content, and the white-theme-mode class must win over those regardless of
+   the user's system color scheme preference.                                */
 .content.white-theme-mode {
   background-color: #ffffff !important;
   color: #000000 !important;
@@ -6,7 +9,14 @@
   min-height: 100vh;
 }
 
-/* Specific component overrides for white theme */
+@media (prefers-color-scheme: dark) {
+  .content.white-theme-mode {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+
+/* White-theme overrides for shared components rendered on these pages */
 .white-theme-mode .ai-hub-title {
   color: #000000 !important;
   font-family: "EB Garamond", Georgia, serif !important;
@@ -28,25 +38,17 @@
   font-family: "Aptos", "Segoe UI", sans-serif !important;
 }
 
+/* These need !important to override dark-mode color inherited from .content */
 .white-theme-mode .home-intro p,
 .white-theme-mode .home-entry-text {
   color: #1e293b !important;
 }
 
-/* Force white background even in dark mode preferences for these pages */
-@media (prefers-color-scheme: dark) {
-  .content.white-theme-mode {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-  }
-  
-}
-
-/* Home Page specific layouts (inherited within white-theme-mode) */
+/* ── Home page layout ────────────────────────────────────────────────────── */
 .home {
-  background-color: transparent !important;
-  color: inherit !important;
-  font-family: inherit !important;
+  background-color: transparent;
+  color: inherit;
+  font-family: inherit;
   padding-top: 2.5rem;
   padding-bottom: 4rem;
 }
@@ -85,79 +87,101 @@
   flex-direction: row-reverse;
 }
 
-/* Base Card Style */
+@media (max-width: 600px) {
+  .home-entry,
+  .home-entry--right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.home-entry-text {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  font-weight: 300;
+  margin: 0;
+  opacity: 0.8;
+  flex: 1;
+}
+
+/* ── Home cards ──────────────────────────────────────────────────────────── */
 .home-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 2.5rem !important;
+  padding: 2.5rem;
   width: 320px;
   min-width: 320px;
   min-height: 200px;
-  border-radius: 16px !important;
+  border-radius: 16px;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
   overflow: hidden;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  color: #ffffff;
 }
 
 .home-card:hover {
   transform: translateY(-5px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow:
     0 12px 40px 0 rgba(31, 38, 135, 0.45),
-    inset 0 0 15px rgba(255, 255, 255, 0.2) !important;
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
-/* Card Specific Themes */
+.home-card:focus-visible {
+  outline: 2px solid rgba(16, 185, 129, 0.9);
+  outline-offset: 3px;
+}
+
+/* Card-specific gradient themes */
 .home-card--library {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.88) 0%, rgba(22, 33, 62, 0.92) 100%) !important;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.88) 0%, rgba(22, 33, 62, 0.92) 100%);
 }
 .home-card--library:hover {
-  background: linear-gradient(135deg, rgba(36, 36, 62, 0.92) 0%, rgba(28, 42, 78, 0.95) 100%) !important;
+  background: linear-gradient(135deg, rgba(36, 36, 62, 0.92) 0%, rgba(28, 42, 78, 0.95) 100%);
 }
 
 .home-card--ai-hub {
-  background: linear-gradient(135deg, rgba(78, 84, 200, 0.82) 0%, rgba(143, 148, 251, 0.72) 100%) !important;
+  background: linear-gradient(135deg, rgba(78, 84, 200, 0.82) 0%, rgba(143, 148, 251, 0.72) 100%);
 }
 .home-card--ai-hub:hover {
-  background: linear-gradient(135deg, rgba(90, 96, 215, 0.88) 0%, rgba(155, 160, 255, 0.80) 100%) !important;
+  background: linear-gradient(135deg, rgba(90, 96, 215, 0.88) 0%, rgba(155, 160, 255, 0.80) 100%);
 }
 
 .home-card--illustrations {
-  background: linear-gradient(135deg, rgba(17, 153, 142, 0.82) 0%, rgba(56, 239, 125, 0.72) 100%) !important;
+  background: linear-gradient(135deg, rgba(17, 153, 142, 0.82) 0%, rgba(56, 239, 125, 0.72) 100%);
 }
 .home-card--illustrations:hover {
-  background: linear-gradient(135deg, rgba(20, 168, 156, 0.88) 0%, rgba(70, 250, 138, 0.80) 100%) !important;
+  background: linear-gradient(135deg, rgba(20, 168, 156, 0.88) 0%, rgba(70, 250, 138, 0.80) 100%);
 }
 
 .home-card--geography {
-  background: linear-gradient(135deg, rgba(244, 107, 69, 0.82) 0%, rgba(238, 168, 73, 0.72) 100%) !important;
+  background: linear-gradient(135deg, rgba(244, 107, 69, 0.82) 0%, rgba(238, 168, 73, 0.72) 100%);
 }
 .home-card--geography:hover {
-  background: linear-gradient(135deg, rgba(252, 120, 80, 0.88) 0%, rgba(248, 180, 85, 0.80) 100%) !important;
+  background: linear-gradient(135deg, rgba(252, 120, 80, 0.88) 0%, rgba(248, 180, 85, 0.80) 100%);
 }
 
 .home-card-title {
-  color: #ffffff !important;
-  font-family: "Aptos", "Segoe UI", sans-serif !important;
-  font-size: 1.75rem !important;
-  font-weight: 700 !important;
+  color: #ffffff;
+  font-family: "Aptos", "Segoe UI", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
   margin-bottom: 1.5rem;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .home-card-foot {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  font-size: 0.8rem !important;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-top: auto;
@@ -179,13 +203,4 @@
 
 .home-card:hover .home-card-arrow {
   transform: translateX(5px);
-}
-
-.home-entry-text {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  font-weight: 300;
-  margin: 0;
-  opacity: 0.8;
-  flex: 1;
 }
