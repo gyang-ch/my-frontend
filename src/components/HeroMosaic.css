@@ -6,32 +6,45 @@
 
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
 
   background: #060e1c;
   filter: blur(2px) brightness(0.72) saturate(0.55);
   overflow: hidden;
 }
 
-/* ── Each row ─────────────────────────────────────────────── */
+/* ── Each horizontal rail ──────────────────────────────────── */
 
-.hero-mosaic-row {
-  display: flex;
-  gap: 1px;
-  flex-shrink: 0;
+.hero-mosaic-rail {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Odd rows shift left by exactly half a tile unit (tile + gap) / 2
-   to produce a true brick-pattern stagger.                   */
-.hero-mosaic-row--offset {
-  margin-left: calc((130px + 1px) / -2);
+/* The scrolling track — contains two identical sets side by side for seamless looping */
+.hero-mosaic-track {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  height: 100%;
+  will-change: transform;
+}
+
+/* One copy of a row's tile images */
+.hero-mosaic-set {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  gap: 4px;
+  height: 100%;
 }
 
 /* ── Individual tile ──────────────────────────────────────── */
 
 .hero-mosaic-img {
   flex: 0 0 130px;
-  height: 148px;
+  height: 100%;
   object-fit: cover;
   display: block;
   user-select: none;
