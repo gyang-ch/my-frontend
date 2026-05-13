@@ -707,7 +707,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
 
   return (
     <div className="book-reader-wrapper" style={{ display: 'flex', flexDirection: 'column', width: '100%', margin: 0 }}>
-      <div className="book-reader" style={{ background: '#2d3748', borderRadius: 0, padding: '2rem 0.75rem', border: 'none', width: '100%', boxSizing: 'border-box' }}>
+      <div className="book-reader" style={{ borderRadius: 0, padding: '2rem 0.75rem', border: 'none', width: '100%', boxSizing: 'border-box' }}>
 	        <div className="reader-header" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '1px solid rgba(148, 163, 184, 0.2)', paddingBottom: '1.5rem' }}>
 	          <h2 style={{ 
 	            margin: 0, 

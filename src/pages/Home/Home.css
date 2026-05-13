@@ -1,47 +1,38 @@
 /* ── White-theme override for the <main> container ──────────────────────────
-   These !important rules are still needed: App.css sets dark-mode colors on
-   .content, and the white-theme-mode class must win over those regardless of
-   the user's system color scheme preference.                                */
+   .content is always white — no dark-mode variant. This rule makes that
+   intent explicit and sets the Aptos font stack for content pages.          */
 .content.white-theme-mode {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  font-family: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-}
-
-@media (prefers-color-scheme: dark) {
-  .content.white-theme-mode {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-  }
 }
 
 /* White-theme overrides for shared components rendered on these pages */
 .white-theme-mode .ai-hub-title {
-  color: #000000 !important;
-  font-family: "EB Garamond", Georgia, serif !important;
-  font-weight: 500 !important;
+  color: #000000;
+  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 500;
 }
 
 .white-theme-mode .section-heading,
 .white-theme-mode .illus-heading,
 .white-theme-mode .period-title {
-  color: #000000 !important;
-  font-family: "EB Garamond", Georgia, serif !important;
-  font-weight: 500 !important;
+  color: #000000;
+  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 500;
 }
 
 .white-theme-mode .section-description,
 .white-theme-mode .illus-subheading,
 .white-theme-mode .ai-hub-body {
-  color: rgba(0, 0, 0, 0.7) !important;
-  font-family: "Aptos", "Segoe UI", sans-serif !important;
+  color: rgba(0, 0, 0, 0.7);
+  font-family: "Aptos", "Segoe UI", sans-serif;
 }
 
-/* These need !important to override dark-mode color inherited from .content */
 .white-theme-mode .home-intro p,
 .white-theme-mode .home-entry-text {
-  color: #1e293b !important;
+  color: #1e293b;
 }
 
 /* ── Home page layout ────────────────────────────────────────────────────── */
