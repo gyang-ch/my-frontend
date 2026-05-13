@@ -2,7 +2,7 @@
    .content is always white — no dark-mode variant. This rule makes that
    intent explicit and sets the Aptos font stack for content pages.          */
 .content.white-theme-mode {
-  background-color: #ffffff;
+  background-color: var(--surface);
   color: #000000;
   font-family: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
   min-height: 100vh;
@@ -32,7 +32,7 @@
 
 .white-theme-mode .home-intro p,
 .white-theme-mode .home-entry-text {
-  color: #1e293b;
+  color: var(--ink-750);
 }
 
 /* ── Home page layout ────────────────────────────────────────────────────── */
@@ -113,7 +113,7 @@
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  color: #ffffff;
+  color: var(--surface);
 }
 
 .home-card:hover {
@@ -159,7 +159,7 @@
 }
 
 .home-card-title {
-  color: #ffffff;
+  color: var(--surface);
   font-family: "Aptos", "Segoe UI", sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
@@ -170,7 +170,7 @@
 }
 
 .home-card-foot {
-  color: #ffffff;
+  color: var(--surface);
   font-weight: 600;
   font-size: 0.8rem;
   text-transform: uppercase;

@@ -1,20 +1,20 @@
 /* OpenSeadragon navigator — !important needed to override OSD's own inline styles */
 .navigator {
-  background-color: #0f172a !important;
+  background-color: var(--ink-900) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
   transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
-  border: 1px solid #334155 !important;
+  border: 1px solid var(--ink-600) !important;
   box-sizing: border-box !important;
 }
 .navigator:hover {
-  border-color: #38bdf8 !important;
+  border-color: var(--sky) !important;
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.4) !important;
 }
 .displayregion {
   border-radius: 2px !important;
-  border: 2px solid #38bdf8 !important;
+  border: 2px solid var(--sky) !important;
   transition: border-color 0.2s ease !important;
 }
 .displayregion:hover {
@@ -44,7 +44,7 @@
   bottom: -4px;
   left: -4px;
   border-radius: 8px;
-  background: linear-gradient(to right, #2dd4bf, #06b6d4);
+  background: linear-gradient(to right, var(--teal), #06b6d4);
   opacity: 0;
   filter: blur(4px);
   transition: opacity 0.2s;
@@ -61,18 +61,18 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--on-dark-2);
   background-color: rgba(255, 255, 255, 0.95);
-  color: #334155;
+  color: var(--ink-600);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
   cursor: pointer;
   padding: 0;
 }
 .osd-btn:hover {
-  background-color: #0d9488;
-  color: #ffffff;
-  border-color: #14b8a6;
+  background-color: var(--teal-dark);
+  color: var(--surface);
+  border-color: var(--teal-hover);
 }
 .osd-btn:active {
   background-color: #0f766e;

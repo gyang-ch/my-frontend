@@ -11,7 +11,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.9);
-  color: #ffffff;
+  color: var(--surface);
   font-weight: 700;
   font-size: 0.9rem;
   text-decoration: none;
@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
   padding: clamp(4rem, 8vh, 5.5rem) 2rem clamp(5rem, 12vh, 10rem);
-  background-color: #FFFFFF;
+  background-color: var(--surface);
   border-bottom: 1px solid #dcd3bd;
   text-align: center;
   overflow: hidden;
@@ -71,7 +71,7 @@
 .hero h1 {
   font-size: clamp(2.5rem, 5vw, 4rem);
   margin-bottom: 1.5rem;
-  color: #ffffff;
+  color: var(--surface);
   text-shadow: 0 4px 12px rgba(0,0,0,0.5);
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -82,7 +82,7 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(90deg, #38bdf8 0%, #10b981 50%, #38bdf8 100%);
+  background: linear-gradient(90deg, var(--sky) 0%, var(--brand-mid) 50%, var(--sky) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -103,7 +103,7 @@
 
 .subtitle {
   font-size: 1.25rem;
-  color: #e2e8f0;
+  color: var(--on-dark-2);
   max-width: 800px;
   margin: 0 auto;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
@@ -116,8 +116,8 @@
   padding: 4rem 2rem;
   width: 100%;
   box-sizing: border-box;
-  color: #1e293b;
-  background-color: #ffffff;
+  color: var(--ink-750);
+  background-color: var(--surface);
 }
 
 .site-footer {
@@ -131,7 +131,7 @@
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 0.9rem;
   letter-spacing: 0.04em;
-  color: #94a3b8;
+  color: var(--on-dark-5);
 }
 
 
@@ -154,7 +154,7 @@
   margin: 0 auto;
   max-width: 70ch;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-2);
   font-size: 1.05rem;
 }
 
@@ -215,14 +215,14 @@
 }
 
 .section-description {
-  color: #718096;
+  color: var(--on-dark-6);
   margin-bottom: 2rem;
 }
 
 .timeline-wrapper {
   height: 400px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--on-dark-2);
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -304,7 +304,7 @@
     rgba(212, 175, 55, 0.2)
   );
   background-size: 200% 100%;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(var(--surface) 0 0) content-box, linear-gradient(var(--surface) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -372,7 +372,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.4;
-  color: #f7fafc;
+  color: var(--on-dark-1);
   font-family: 'Georgia', serif;
 }
 
@@ -381,7 +381,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #63b3ed;
+  color: var(--blue-3);
   background: rgba(49, 130, 206, 0.15);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -397,14 +397,14 @@
 
 .meta-item {
   font-size: 0.8rem;
-  color: #e2e8f0;
+  color: var(--on-dark-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .meta-item strong {
-  color: #cbd5e0;
+  color: var(--on-dark-3);
   text-transform: uppercase;
   font-size: 0.7rem;
   letter-spacing: 0.5px;
@@ -438,7 +438,7 @@
 
 .attribution-text {
   font-size: 0.65rem;
-  color: #cbd5e0;
+  color: var(--on-dark-3);
   margin: 0;
   font-style: italic;
   flex: 1;
@@ -449,7 +449,7 @@
 }
 
 .manifest-link {
-  color: #cbd5e0;
+  color: var(--on-dark-3);
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 500;
@@ -462,7 +462,7 @@
 }
 
 .manifest-link:hover {
-  color: #fff;
+  color: var(--surface);
   border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.08);
 }
@@ -476,7 +476,7 @@
 
 .explore-btn {
   background: #3182ce;
-  color: #fff !important;
+  color: var(--surface) !important;
   border: none;
   padding: 0.5rem 1.25rem;
   border-radius: 6px;
@@ -497,7 +497,7 @@
 }
 
 .source-link {
-  color: #cbd5e0 !important;
+  color: var(--on-dark-3) !important;
   text-decoration: underline !important;
   text-underline-offset: 3px;
   font-size: 0.75rem;
@@ -510,15 +510,15 @@
 }
 
 .source-link:hover {
-  color: #63b3ed !important;
-  text-decoration-color: #63b3ed;
+  color: var(--blue-3) !important;
+  text-decoration-color: var(--blue-3);
 }
 
 /* Book Reader Styles */
 .book-reader {
   padding: 0;
-  background-color: #2d3748;
-  color: #f7fafc;
+  background-color: var(--ink-700);
+  color: var(--on-dark-1);
 }
 
 .reader-header {
@@ -557,13 +557,13 @@
 }
 
 .text-display-panel::-webkit-scrollbar-track {
-  background: #1a202c;
+  background: var(--ink-800);
 }
 
 .text-display-panel::-webkit-scrollbar-thumb {
-  background-color: #4a5568;
+  background-color: var(--ink-500);
   border-radius: 20px;
-  border: 2px solid #1a202c;
+  border: 2px solid var(--ink-800);
 }
 
 
@@ -588,7 +588,7 @@
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
-.plant-results-list h4 { margin: 0 0 1rem 0; font-size: 1rem; color: #f7fafc; }
+.plant-results-list h4 { margin: 0 0 1rem 0; font-size: 1rem; color: var(--on-dark-1); }
 
 .results-tags {
   display: flex;
@@ -632,7 +632,7 @@
 .line-no {
   font-family: monospace;
   font-size: 0.8rem;
-  color: #a0aec0;
+  color: var(--on-dark-4);
   min-width: 25px;
 }
 
@@ -644,8 +644,8 @@
 /* Custom Tippy Theme matching the requested style */
 .tippy-box[data-theme~='seadragon'] {
   background-color: rgba(4, 47, 46, 0.95);
-  color: #2dd4bf;
-  border: 2px solid #2dd4bf;
+  color: var(--teal);
+  border: 2px solid var(--teal);
   border-radius: 8px;
   box-shadow: 0 0 12px 2px rgba(45, 212, 191, 0.6);
   font-weight: 600;
@@ -655,16 +655,16 @@
   font-family: inherit;
 }
 .tippy-box[data-theme~='seadragon'][data-placement^='top'] > .tippy-arrow::before {
-  border-top-color: #2dd4bf;
+  border-top-color: var(--teal);
 }
 .tippy-box[data-theme~='seadragon'][data-placement^='bottom'] > .tippy-arrow::before {
-  border-bottom-color: #2dd4bf;
+  border-bottom-color: var(--teal);
 }
 .tippy-box[data-theme~='seadragon'][data-placement^='left'] > .tippy-arrow::before {
-  border-left-color: #2dd4bf;
+  border-left-color: var(--teal);
 }
 .tippy-box[data-theme~='seadragon'][data-placement^='right'] > .tippy-arrow::before {
-  border-right-color: #2dd4bf;
+  border-right-color: var(--teal);
 }
 .tippy-box[data-theme~='seadragon'] > .tippy-content {
   padding: 6px 10px;
@@ -676,7 +676,7 @@
   border-radius: 9999px;
   border: none;
   background: #13cf71; /* Vibrant green background */
-  color: #ffffff; /* White text for better contrast on green */
+  color: var(--surface); /* White text for better contrast on green */
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
@@ -693,7 +693,7 @@
 }
 
 .filter-chip.active {
-  color: #ffffff;
+  color: var(--surface);
   background: transparent;
 }
 
@@ -800,7 +800,7 @@
   font-style: italic;
   font-weight: 700;
   font-size: 1.45rem;
-  color: #34d399;
+  color: var(--brand);
   margin-left: 0;
   padding: 0;
   letter-spacing: 0.5px;
@@ -813,7 +813,7 @@
     text-shadow: 0 0 15px rgba(255,255,255,0.05);
   }
   .brand-vision {
-    color: #34d399;
+    color: var(--brand);
     filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.2));
   }
 }
@@ -851,7 +851,7 @@
 
 @media (prefers-color-scheme: dark) {
   .tab-btn {
-    color: #ffffff; /* Brighter white for dark mode contrast */
+    color: var(--surface); /* Brighter white for dark mode contrast */
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 }
@@ -881,7 +881,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #34d399; /* Changed to green to match vision brand */
+  background-color: var(--brand); /* Changed to green to match vision brand */
   transform: scaleX(0);
   transition: transform 0.3s ease;
   transform-origin: center;
@@ -908,14 +908,14 @@
 }
 
 .tab-btn.active {
-  color: #059669;
+  color: var(--brand-deep);
   background: transparent;
   box-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   .tab-btn.active {
-    color: #34d399;
+    color: var(--brand);
     background: transparent;
   }
 }
@@ -925,7 +925,7 @@
 }
 
 .tab-btn.is-disabled {
-  color: #94a3b8;
+  color: var(--on-dark-5);
   cursor: not-allowed;
   text-shadow: none;
   opacity: 0.6;
@@ -936,7 +936,7 @@
 }
 
 .tab-btn.is-disabled:hover {
-  color: #64748b;
+  color: var(--ink-400);
   text-shadow: none;
 }
 

@@ -39,7 +39,7 @@
   justify-content: center;
   gap: 1rem;
   background: #0d1117;
-  color: #94a3b8;
+  color: var(--on-dark-5);
   font-size: 0.9rem;
   z-index: 10;
 }
@@ -63,14 +63,14 @@
   flex-direction: column;
   gap: 6px;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--on-dark-5);
   pointer-events: none;
   z-index: 5;
 }
 
 .illus-network-stats {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--ink-400);
   margin-bottom: 2px;
 }
 
@@ -90,6 +90,6 @@
 .illus-network-hint {
   margin-top: 2px;
   font-size: 0.68rem;
-  color: #475569;
+  color: var(--text-2);
   font-style: italic;
 }
