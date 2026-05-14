@@ -53,32 +53,56 @@ function App() {
   )
   const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations') || pathname.startsWith('/methodology')
 
-  // Scroll to content on path change
+  // Scroll to top on navigation so the hero and its entrance animation are visible
   useEffect(() => {
-    // Only scroll if we are not at the very top (optional logic, but usually good)
-    // Actually user said "whenever i click another tab", so we do it.
-    scrollToContent(heroSectionRef);
+    window.scrollTo({ top: 0 })
   }, [pathname]);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
     if (!heroTextRef.current) return
 
-    const elements = Array.from(heroTextRef.current.children)
-    if (elements.length === 0) return
+    const chars = Array.from(
+      heroTextRef.current.querySelectorAll<HTMLElement>('.hero-char'),
+    )
+    const subtitle = heroTextRef.current.querySelector<HTMLElement>('.subtitle')
 
+    if (chars.length === 0) return
+
+    if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
+
+    // Each character flies in from a random scattered position
     gsap.fromTo(
-      elements,
-      { opacity: 0, y: 40, filter: 'blur(10px)' },
+      chars,
+      {
+        opacity: 0,
+        x: () => gsap.utils.random(-90, 90),
+        y: () => gsap.utils.random(-60, 60),
+        rotation: () => gsap.utils.random(-22, 22),
+        scale: 0.6,
+      },
       {
         opacity: 1,
+        x: 0,
         y: 0,
-        filter: 'blur(0px)',
-        duration: 1.15,
-        stagger: 0.18,
-        ease: 'power3.out',
-        delay: 0.05,
-        clearProps: 'transform,filter',
+        rotation: 0,
+        scale: 1,
+        duration: 0.75,
+        stagger: { each: 0.028, from: 'start' },
+        ease: 'back.out(1.4)',
+        delay: 0.1,
+        clearProps: 'transform',
+        onComplete: () => {
+          if (!subtitle) return
+          gsap.to(subtitle, {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 1.0,
+            ease: 'power3.out',
+            clearProps: 'transform,filter',
+          })
+        },
       },
     )
   }, [])
@@ -119,8 +143,15 @@ function App() {
         <HeroMosaic />
         <div className="hero-content" ref={heroTextRef}>
           <h1>
-            Computational Analysis of <br />
-            <span className="hero-gradient">Global Botanical Iconography</span>
+            {'Computational Analysis of '.split('').map((char, i) => (
+              <span key={i} className="hero-char">{char}</span>
+            ))}
+            <br />
+            <span className="hero-gradient">
+              {'Global Botanical Iconography'.split('').map((char, i) => (
+                <span key={i} className="hero-char">{char}</span>
+              ))}
+            </span>
           </h1>
           <p className="subtitle">Exploring the intersection of art history, science, and digital humanities.</p>
         </div>

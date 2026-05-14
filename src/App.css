@@ -36,7 +36,6 @@
   justify-content: center;
   padding: clamp(4rem, 8vh, 5.5rem) 2rem clamp(5rem, 12vh, 10rem);
   background-color: var(--surface);
-  border-bottom: 1px solid #dcd3bd;
   text-align: center;
   overflow: hidden;
 }
@@ -75,6 +74,11 @@
   text-shadow: 0 4px 12px rgba(0,0,0,0.5);
   line-height: 1.2;
   letter-spacing: -0.02em;
+}
+
+.hero-char {
+  display: inline-block;
+  white-space: pre;
 }
 
 @keyframes hero-shimmer {
