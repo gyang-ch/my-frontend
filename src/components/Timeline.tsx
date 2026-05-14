@@ -6,6 +6,12 @@ import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import type { BookRecord } from '../data/books';
 
+function barPath(bx: number, barTop: number, bw: number, bh: number): string {
+  if (bh <= 0) return '';
+  const r = Math.min(5, bh / 2, bw / 2);
+  return `M${bx},${barTop + r} Q${bx},${barTop} ${bx + r},${barTop} H${bx + bw - r} Q${bx + bw},${barTop} ${bx + bw},${barTop + r} V${barTop + bh} H${bx} Z`;
+}
+
 interface TimelineProps {
   data: BookRecord[];
   width: number;
@@ -88,7 +94,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       .scaleBand()
       .domain(binnedData.map((d) => d.period))
       .range([margin.left, width - margin.right])
-      .paddingInner(0.34)
+      .paddingInner(0.22)
       .paddingOuter(0.14);
 
     const y = d3
@@ -107,9 +113,10 @@ export const Timeline: React.FC<TimelineProps> = ({
       .attr('x2', width - margin.right)
       .attr('y1', (d) => y(d))
       .attr('y2', (d) => y(d))
-      .attr('stroke', '#334155')
+      .attr('stroke', 'rgba(148, 163, 184, 0.2)')
       .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '4 6');
+      .attr('stroke-dasharray', '3 4')
+      .attr('shape-rendering', 'crispEdges');
 
     svg
       .append('g')
@@ -124,30 +131,28 @@ export const Timeline: React.FC<TimelineProps> = ({
       .style('font-family', 'sans-serif')
       .text((d) => d.toLocaleString());
 
+    const bottomY = margin.top + plotHeight;
+
     const bars = svg
       .append('g')
-      .selectAll('rect')
+      .selectAll('path')
       .data(binnedData)
-      .join('rect')
-      .attr('x', (d) => x(d.period) || 0)
-      .attr('width', x.bandwidth())
-      .attr('rx', 4)
+      .join('path')
+      .attr('d', (d) => barPath(x(d.period) || 0, y(d.count), x.bandwidth(), bottomY - y(d.count)))
       .attr('fill', (d) => d.period === selectedPeriod ? '#7dd3fc' : `url(#${gradientId})`)
       .style('cursor', 'pointer');
-      
+
     // Apply selected glow style on initialization
     bars.filter(d => d.period === selectedPeriod)
       .attr('filter', 'drop-shadow(0px 0px 10px rgba(56, 189, 248, 0.9)) drop-shadow(0px 0px 24px rgba(14, 165, 233, 0.8))');
 
-    bars.attr('y', margin.top + plotHeight).attr('height', 0);
-    bars.each(function(d, index) {
+    // Animate bars growing from the baseline upward
+    bars.each(function(_d, index) {
+      gsap.set(this, { scaleY: 0, transformOrigin: '50% 100%' });
       gsap.to(this, {
-        attr: {
-          y: y(d.count),
-          height: margin.top + plotHeight - y(d.count),
-        },
+        scaleY: 1,
         duration: 0.8,
-        delay: index * 0.03,
+        delay: index * 0.05,
         ease: 'power3.out',
       });
     });
@@ -175,15 +180,11 @@ export const Timeline: React.FC<TimelineProps> = ({
     });
 
     const showHoverEffect = (d: any, node: any) => {
-      if (d.period === selectedPeriod) return; // Don't animate away selection
+      if (d.period === selectedPeriod) return;
 
       if (activeBarNode && activeBarNode !== node && activeDatum && activeDatum.period !== selectedPeriod) {
         gsap.to(activeBarNode, {
-          attr: {
-            x: x(activeDatum.period) || 0,
-            width: x.bandwidth(),
-            fill: `url(#${gradientId})`,
-          },
+          attr: { fill: `url(#${gradientId})` },
           filter: 'none',
           duration: 0.15,
           ease: 'power2.out',
@@ -194,11 +195,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       activeDatum = d;
 
       gsap.to(node, {
-        attr: {
-          x: (x(d.period) || 0) - 2,
-          width: x.bandwidth() + 4,
-          fill: '#7dd3fc',
-        },
+        attr: { fill: '#7dd3fc' },
         filter: 'drop-shadow(0px 0px 10px rgba(56, 189, 248, 0.9)) drop-shadow(0px 0px 24px rgba(14, 165, 233, 0.8))',
         duration: 0.2,
         ease: 'power2.out',
@@ -206,14 +203,10 @@ export const Timeline: React.FC<TimelineProps> = ({
     };
 
     const hideHoverEffect = (d: any, node: any) => {
-      if (d.period === selectedPeriod) return; // Don't hide if selected
-      
+      if (d.period === selectedPeriod) return;
+
       gsap.to(node, {
-        attr: {
-          x: x(d.period) || 0,
-          width: x.bandwidth(),
-          fill: `url(#${gradientId})`,
-        },
+        attr: { fill: `url(#${gradientId})` },
         filter: 'none',
         duration: 0.2,
         ease: 'power2.out',

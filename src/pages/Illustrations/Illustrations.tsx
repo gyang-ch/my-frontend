@@ -4,61 +4,15 @@ import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/masonry.css'
 import type { Photo } from 'react-photo-album'
-const illustrationsUrl = '/data/illustrations.public.jsonl'
 import { Paginator } from '../../components/Paginator'
 import { IllustrationNetworkSection } from '../IllustrationNetwork/IllustrationNetwork'
+import { type IllustrationRecord, fetchIllustrations } from '../../data/illustrationsCache'
 import './Illustrations.css'
 
 export const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
 export const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
 
-export interface IllustrationRecord {
-  illustration_id: string
-  book: {
-    book_id: string
-    title: string
-    authors: string[]
-    language: string[]
-    year: number
-    category: string
-    institution: string
-    shelfmark: string
-    iiif_manifest: string
-  }
-  page: {
-    page_number: number
-    page_index: number
-    iiif_url: string
-    page_image?: string
-    image_width: number
-    image_height: number
-  }
-  illustration: {
-    crop_image: string
-    width: number
-    height: number
-    bbox_px: [number, number, number, number]
-  }
-  detection: {
-    plant_type_by_YOLO: string | null
-    confidence: number
-    plant_type_from_text: string | null
-  }
-  text: {
-    page_transcription: string
-    illustration_caption: string
-  }
-  quality: {
-    needs_review: boolean
-    human_verified: boolean
-    verification_notes: string
-  }
-  cluster: {
-    algorithm: string
-    cluster_id: number
-  }
-  neighbors: string[]
-}
+export type { IllustrationRecord }
 
 export interface IllustrationPhoto extends Photo {
   record: IllustrationRecord
@@ -560,26 +514,15 @@ export function IllustrationsPage() {
   const closeCallbackRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    fetch(illustrationsUrl)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.text()
-      })
-      .then((text) => {
-        allPhotosRef.current = text
-          .split('\n')
-          .filter(Boolean)
-          .map((line): IllustrationPhoto => {
-            const record = JSON.parse(line) as IllustrationRecord
-            return {
-              src: `${AZURE_BASE}/${record.illustration.crop_image}?${AZURE_SAS}`,
-              width: record.illustration.width,
-              height: record.illustration.height,
-              key: record.illustration_id,
-              record,
-            }
-          })
-        // Build lookup map for neighbor resolution
+    fetchIllustrations()
+      .then((records) => {
+        allPhotosRef.current = records.map((record): IllustrationPhoto => ({
+          src: `${AZURE_BASE}/${record.illustration.crop_image}?${AZURE_SAS}`,
+          width: record.illustration.width,
+          height: record.illustration.height,
+          key: record.illustration_id,
+          record,
+        }))
         const map = new Map<string, IllustrationPhoto>()
         allPhotosRef.current.forEach((p) => map.set(p.record.illustration_id, p))
         photoMapRef.current = map

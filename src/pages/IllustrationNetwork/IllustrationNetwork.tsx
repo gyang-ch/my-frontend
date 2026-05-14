@@ -3,10 +3,9 @@ import Graph from 'graphology'
 import Sigma from 'sigma'
 import forceAtlas2 from 'graphology-layout-forceatlas2'
 import { IllustrationPopup, AZURE_BASE, AZURE_SAS } from '../Illustrations/Illustrations'
-import type { IllustrationRecord, IllustrationPhoto } from '../Illustrations/Illustrations'
+import type { IllustrationPhoto } from '../Illustrations/Illustrations'
+import { type IllustrationRecord, fetchIllustrations } from '../../data/illustrationsCache'
 import './IllustrationNetwork.css'
-
-const ILLUSTRATIONS_URL = '/data/illustrations.public.jsonl'
 const TOP_K_EDGES = 3
 
 const CLUSTER_COLORS: Record<number, string> = {
@@ -141,18 +140,9 @@ export function IllustrationNetworkSection() {
     let cancelled = false
     let timeoutId: ReturnType<typeof setTimeout>
 
-    fetch(ILLUSTRATIONS_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.text()
-      })
-      .then((text) => {
+    fetchIllustrations()
+      .then((records) => {
         if (cancelled) return
-
-        const records = text
-          .split('\n')
-          .filter(Boolean)
-          .map((l) => JSON.parse(l) as IllustrationRecord)
 
         photoMapRef.current = makePhotoMap(records)
 
