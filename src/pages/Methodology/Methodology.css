@@ -31,8 +31,9 @@
 
 /* Body text */
 .meth-body p {
-  font-size: 1.1rem;
-  line-height: 1.85;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  line-height: 1.7;
   color: #2c2c2c;
   margin: 0 0 1.5rem;
   text-align: justify;

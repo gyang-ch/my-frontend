@@ -69,42 +69,51 @@ function App() {
 
     if (chars.length === 0) return
 
+    const firstLineLength = 'Computational Analysis of '.length
+    const line1Chars = chars.slice(0, firstLineLength)
+    const line2Chars = chars.slice(firstLineLength)
+
     if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
 
-    // Each character flies in from a random scattered position
-    gsap.fromTo(
-      chars,
-      {
-        opacity: 0,
-        x: () => gsap.utils.random(-90, 90),
-        y: () => gsap.utils.random(-60, 60),
-        rotation: () => gsap.utils.random(-22, 22),
-        scale: 0.6,
-      },
-      {
+    const scatterFrom = {
+      opacity: 0,
+      x: () => gsap.utils.random(-90, 90),
+      y: () => gsap.utils.random(-60, 60),
+      rotation: () => gsap.utils.random(-22, 22),
+      scale: 0.6,
+    }
+
+    const tl = gsap.timeline({ delay: 0.1 })
+
+    // Step 1: line 1 scatter fly-in (faster stagger)
+    tl.fromTo(line1Chars, scatterFrom, {
+      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
+      duration: 0.65,
+      stagger: { each: 0.018, from: 'start' },
+      ease: 'back.out(1.4)',
+      clearProps: 'transform',
+    })
+
+    // Step 2: line 2 starts shortly after line 1 ends
+    tl.fromTo(line2Chars, scatterFrom, {
+      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
+      duration: 0.65,
+      stagger: { each: 0.022, from: 'start' },
+      ease: 'back.out(1.4)',
+      clearProps: 'transform',
+    }, '-=0.8')
+
+    // Step 3: subtitle slides up shortly after line 2 ends
+    if (subtitle) {
+      tl.to(subtitle, {
         opacity: 1,
-        x: 0,
         y: 0,
-        rotation: 0,
-        scale: 1,
-        duration: 0.75,
-        stagger: { each: 0.028, from: 'start' },
-        ease: 'back.out(1.4)',
-        delay: 0.1,
-        clearProps: 'transform',
-        onComplete: () => {
-          if (!subtitle) return
-          gsap.to(subtitle, {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 1.0,
-            ease: 'power3.out',
-            clearProps: 'transform,filter',
-          })
-        },
-      },
-    )
+        filter: 'blur(0px)',
+        duration: 0.85,
+        ease: 'power3.out',
+        clearProps: 'transform,filter',
+      }, '+=0.08')
+    }
   }, [])
 
   useEffect(() => {
