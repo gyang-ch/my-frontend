@@ -43,8 +43,10 @@
 /* ── Individual tile ──────────────────────────────────────── */
 
 .hero-mosaic-img {
-  flex: 0 0 130px;
+  flex: 0 0 auto;
   height: 100%;
+  width: auto;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   display: block;
   user-select: none;

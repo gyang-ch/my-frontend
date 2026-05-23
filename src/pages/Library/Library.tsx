@@ -13,6 +13,24 @@ const prefersReducedMotion = () =>
   window.matchMedia &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+const BAR_PALETTE = [
+  '#4299e1', // blue
+  '#48bb78', // green
+  '#f6ad55', // orange
+  '#9f7aea', // purple
+  '#fc8181', // red
+  '#2dd4bf', // teal
+  '#ec4899', // pink
+  '#facc15', // amber
+]
+
+const hexToRgba = (hex: string, alpha: number) => {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export function LibraryPage() {
   const navigate = useNavigate()
 
@@ -90,18 +108,14 @@ export function LibraryPage() {
 
   const handleLegendMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion()) return
-    const item = e.currentTarget
-    const bar = item.querySelector('.legend-bar-inner')
-    gsap.to(item, { scale: 1.02, duration: 0.25, ease: 'power2.out', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' })
-    gsap.to(bar, { filter: 'saturate(2) contrast(1.1)', duration: 0.25 })
+    const bar = e.currentTarget.querySelector('.legend-bar-inner')
+    gsap.to(bar, { filter: 'saturate(1.25) brightness(1.08)', duration: 0.25 })
   }
 
   const handleLegendMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion()) return
-    const item = e.currentTarget
-    const bar = item.querySelector('.legend-bar-inner')
-    gsap.to(item, { scale: 1, duration: 0.25, ease: 'power2.out', boxShadow: 'none' })
-    gsap.to(bar, { filter: 'saturate(1) contrast(1)', duration: 0.25 })
+    const bar = e.currentTarget.querySelector('.legend-bar-inner')
+    gsap.to(bar, { filter: 'saturate(1) brightness(1)', duration: 0.25 })
   }
 
   if (!bookData) return <div style={{ padding: '20px' }}>Loading data...</div>
@@ -174,13 +188,14 @@ export function LibraryPage() {
             className="legend-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-              gap: '1rem 2.5rem',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))',
+              gap: '0.9rem 2.5rem',
             }}
           >
-            {languageStats.map(({ lang, count }) => {
+            {languageStats.map(({ lang, count }, idx) => {
               const isActive = selectedLanguage === lang
               const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0
+              const color = BAR_PALETTE[idx % BAR_PALETTE.length]
 
               return (
                 <div
@@ -190,14 +205,16 @@ export function LibraryPage() {
                   onMouseEnter={handleLegendMouseEnter}
                   onMouseLeave={handleLegendMouseLeave}
                   style={{
-                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.85rem',
                     cursor: 'pointer',
-                    height: '36px',
-                    borderRadius: '6px',
-                    background: isActive ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                    border: isActive ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
-                    overflow: 'hidden',
-                    transition: 'all 0.2s ease',
+                    padding: '0.5rem 0.6rem',
+                    borderRadius: '8px',
+                    background: isActive ? hexToRgba(color, 0.12) : 'transparent',
+                    border: isActive ? `1px solid ${hexToRgba(color, 0.5)}` : '1px solid transparent',
+                    transition: 'background 0.2s ease, border-color 0.2s ease',
+                    ['--bar-color' as string]: color,
                   }}
                   role="button"
                   tabIndex={0}
@@ -209,42 +226,58 @@ export function LibraryPage() {
                   }}
                   aria-pressed={isActive}
                 >
-                  <div
-                    className="legend-bar-inner"
-                    data-percentage={percentage}
+                  <strong
                     style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: isActive
-                        ? 'linear-gradient(90deg, rgba(147, 197, 253, 1) 0%, rgba(192, 132, 252, 1) 50%, rgba(244, 114, 182, 1) 100%)'
-                        : 'linear-gradient(90deg, rgba(147, 197, 253, 0.8) 0%, rgba(192, 132, 252, 0.8) 50%, rgba(244, 114, 182, 0.8) 100%)',
-                      clipPath: `inset(0 ${100 - percentage}% 0 0)`,
-                      zIndex: 1,
+                      minWidth: '110px',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      letterSpacing: '0.01em',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
-                  />
+                  >
+                    {lang}
+                  </strong>
 
                   <div
                     style={{
-                      position: 'absolute',
-                      inset: 0,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 1rem',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.02em',
-                      color: '#0f172a',
-                      textShadow: '0 0 4px rgba(255,255,255,0.8), 0 0 2px rgba(255,255,255,1)',
-                      zIndex: 2,
-                      pointerEvents: 'none',
+                      flex: 1,
+                      position: 'relative',
+                      height: '22px',
+                      background: '#e2e8f0',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.06)',
                     }}
                   >
-                    <span>{lang}</span>
-                    <span style={{ fontWeight: 600 }}>
-                      {count} {count === 1 ? 'Work' : 'Works'}
-                    </span>
+                    <div
+                      className="legend-bar-inner"
+                      data-percentage={percentage}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: color,
+                        clipPath: `inset(0 ${100 - percentage}% 0 0)`,
+                        borderRadius: '6px',
+                        boxShadow: isActive ? `0 0 12px ${hexToRgba(color, 0.55)}` : 'none',
+                      }}
+                    />
                   </div>
+
+                  <span
+                    style={{
+                      minWidth: '78px',
+                      textAlign: 'right',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {count} {count === 1 ? 'Work' : 'Works'}
+                  </span>
                 </div>
               )
             })}

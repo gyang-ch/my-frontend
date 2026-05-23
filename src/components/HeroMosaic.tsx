@@ -6,7 +6,7 @@ const HERO_TILES_URL = '/data/hero-tiles.json'
 const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
 const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
 
-const ROWS = 5
+const ROWS = 4
 const PER_ROW = 13
 
 export function HeroMosaic() {

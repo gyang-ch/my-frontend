@@ -947,33 +947,31 @@
 /* Storytelling Adjustments */
 /* Linguistic Legend Effects */
 .legend-item {
-  transition: opacity 0.3s ease !important;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease !important;
 }
 
 .legend-item:hover {
-  opacity: 0.85;
+  background: color-mix(in srgb, var(--bar-color, #a855f7) 8%, transparent) !important;
 }
 
 .legend-item.active:hover {
-  opacity: 1;
+  background: color-mix(in srgb, var(--bar-color, #a855f7) 16%, transparent) !important;
 }
 
 .legend-bar-inner {
-  transition: clip-path 1s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease !important;
+  transition: clip-path 1s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, filter 0.25s ease !important;
 }
 
 .legend-item:hover .legend-bar-inner {
-  filter: brightness(1.15);
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  filter: brightness(1.08) saturate(1.15);
 }
 
 .legend-item.active .legend-bar-inner {
-  box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+  filter: saturate(1.1);
 }
 
 .legend-item.active:hover .legend-bar-inner {
-  filter: brightness(1.1);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.7);
+  filter: brightness(1.05) saturate(1.2);
 }
 
 .full-width-content {
